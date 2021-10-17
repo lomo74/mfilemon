@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <PropertyPageSchema
+      Include="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml" />
+    <AvailableItemName
+      Include="ISCC">
+      <Targets>_ISCC</Targets>
+    </AvailableItemName>
+  </ItemGroup>
+  <UsingTask
+    TaskName="ISCC"
+    TaskFactory="XamlTaskFactory"
+    AssemblyName="Microsoft.Build.Tasks.v4.0">
+    <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
+  </UsingTask>
+  <Target
+    Name="_ISCC"
+    BeforeTargets="$(ISCCBeforeTargets)"
+    AfterTargets="$(ISCCAfterTargets)"
+    Condition="'@(ISCC)' != ''"
+    DependsOnTargets="$(ISCCDependsOn);ComputeISCCOutput"
+    Outputs="@(ISCC-&gt;Metadata('Outputs')-&gt;Distinct())"
+    Inputs="@(ISCC);%(ISCC.AdditionalDependencies);$(MSBuildProjectFile)">
+    <ItemGroup
+      Condition="'@(SelectedFiles)' != ''">
+      <ISCC
+        Remove="@(ISCC)"
+        Condition="'%(Identity)' != '@(SelectedFiles)'" />
+    </ItemGroup>
+    <ItemGroup>
+      <ISCC_tlog
+        Include="%(ISCC.Outputs)"
+        Condition="'%(ISCC.Outputs)' != '' and '%(ISCC.ExcludedFromBuild)' != 'true'">
+        <Source>@(ISCC, '|')</Source>
+      </ISCC_tlog>
+    </ItemGroup>
+    <Message
+      Importance="High"
+      Text="%(ISCC.ExecutionDescription)" />
+    <WriteLinesToFile
+      Condition="'@(ISCC_tlog)' != '' and '%(ISCC_tlog.ExcludedFromBuild)' != 'true'"
+      File="$(IntDir)$(ProjectName).write.1.tlog"
+      Lines="^%(ISCC_tlog.Source);@(ISCC_tlog-&gt;'%(Fullpath)')" />
+    <ISCC
+      Condition="'@(ISCC)' != '' and '%(ISCC.ExcludedFromBuild)' != 'true'"
+      CommandLineTemplate="%(ISCC.CommandLineTemplate)"
+      OutputPath="%(ISCC.OutputPath)"
+      OutputFileName="%(ISCC.OutputFileName)"
+      Quiet="%(ISCC.Quiet)"
+      AdditionalOptions="%(ISCC.AdditionalOptions)"
+      Inputs="@(ISCC)" />
+  </Target>
+  <PropertyGroup>
+    <ComputeLinkInputsTargets>
+            $(ComputeLinkInputsTargets);
+            ComputeISCCOutput;
+          </ComputeLinkInputsTargets>
+    <ComputeLibInputsTargets>
+            $(ComputeLibInputsTargets);
+            ComputeISCCOutput;
+          </ComputeLibInputsTargets>
+  </PropertyGroup>
+  <Target
+    Name="ComputeISCCOutput"
+    Condition="'@(ISCC)' != ''">
+    <ItemGroup>
+      <ISCCDirsToMake
+        Condition="'@(ISCC)' != '' and '%(ISCC.ExcludedFromBuild)' != 'true'"
+        Include="%(ISCC.Outputs)" />
+      <Link
+        Include="%(ISCCDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+      <Lib
+        Include="%(ISCCDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+      <ImpLib
+        Include="%(ISCCDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+    </ItemGroup>
+    <MakeDir
+      Directories="@(ISCCDirsToMake-&gt;'%(RootDir)%(Directory)')" />
+  </Target>
+</Project>

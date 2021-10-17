@@ -1,0 +1,24 @@
+#ifndef _STRINGS_IT
+#define _STRINGS_IT
+
+#define szCaption1 "configurazione porta"
+#define szPortName "Nome della porta"
+#define szOutputPath "Percorso per l'output"
+#define szFilePattern "Formato nome file"
+#define szOverwrite "Sovrascrivi file esistenti"
+#define szUserCommand "Comando utente (%f = nome file, %p = percorso)"
+#define szCmdPath "Esegui da"
+#define szPipeData "Usa pipe per inviare i dati al comando utente"
+#define szWaitProcess "Attendi la fine del processo per"
+#define szLogLevel "Livello log"
+#define szCancel "Annulla"
+#define szCaption2 "nome nuova porta"
+#define szCopy1 "MFILEMON Copyright © 2007-2021 Monti Lorenzo."
+#define szCopy2 "Rilasciato dietro licenza GNU General Public License."
+#define szCopy3 "Consultare LICENSE.txt per i dettagli."
+#define szRunAs "Esegui come utente (o utente@nome.dns.dominio)"
+#define szDomain "Dominio (ignorato se si usa utente@nome.dns.dominio)"
+#define szPassword "Password"
+#define szHideProcess "Nascondi il processo"
+
+#endif

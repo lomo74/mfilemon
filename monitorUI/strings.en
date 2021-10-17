@@ -1,0 +1,24 @@
+#ifndef _STRINGS_EN
+#define _STRINGS_EN
+
+#define szCaption1 "port configuration"
+#define szPortName "Port name"
+#define szOutputPath "Output path"
+#define szFilePattern "Filename pattern"
+#define szOverwrite "Overwrite existing files"
+#define szUserCommand "User command (%f = filename, %p = path)"
+#define szCmdPath "Execute from"
+#define szPipeData "Use pipe to send data to user command"
+#define szWaitProcess "Wait process termination for"
+#define szLogLevel "Log level"
+#define szCancel "Cancel"
+#define szCaption2 "new port name"
+#define szCopy1 "MFILEMON Copyright © 2007-2021 Monti Lorenzo."
+#define szCopy2 "Released under the terms of the GNU General Public License."
+#define szCopy3 "See LICENSE.txt for details."
+#define szRunAs "Run as user (or user@dns.domain.name)"
+#define szDomain "Domain (ignored if using user@dns.domain.name)"
+#define szPassword "Password"
+#define szHideProcess "Hide process"
+
+#endif

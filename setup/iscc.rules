@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="Inno Setup"
+	Version="8,00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="ISCC"
+			DisplayName="Inno Setup Compiler"
+			CommandLine="&quot;C:\Program Files (x86)\Inno Setup 6\ISCC.exe&quot; [AllOptions] [AdditionalOptions] [Inputs]"
+			Outputs="[$ObjectFileName]"
+			FileExtensions="*.iss"
+			ExecutionDescription="Creating setup..."
+			>
+			<Properties>
+				<StringProperty
+					Name="OutputPath"
+					DisplayName="Output path"
+					Description="Output files to specified path. Overrides OutputDir.        (/Opath)"
+					Switch="/O&quot;[value]&quot;"
+					DefaultValue="$(ProjectDir)Output"
+				/>
+				<StringProperty
+					Name="OutputFileName"
+					DisplayName="Output file name"
+					Description="Overrides OutputBaseFilename with the specified filename.   (/Ffilename)"
+					Switch="/F&quot;[value]&quot;"
+					DefaultValue="$(SolutionName)-setup"
+				/>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>

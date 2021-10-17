@@ -1,0 +1,4 @@
+LIBRARY mfilemon
+
+EXPORTS
+	InitializePrintMonitor2

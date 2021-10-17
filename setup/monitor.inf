@@ -1,0 +1,29 @@
+; monitor.inf
+;
+; Installation inf for printer port monitor
+;
+; (c) Copyright 2007-2021 Monti Lorenzo
+;
+
+[Version]
+Signature="$Windows NT$"
+Provider=%PMProducer%
+Class=Printer
+ClassGUID={4D36E979-E325-11CE-BFC1-08002BE10318}
+
+[PortMonitors]
+"Multi File Port Monitor"=mfilemon
+
+[mfilemon]
+CopyFiles=@mfilemon.dll, @mfilemonUI.dll
+PortMonitorDll=mfilemon.dll
+
+[SourceDisksFiles]
+mfilemon.dll=1,,
+mfilemonUI.dll=1,,
+
+[SourceDisksNames]
+1="Multi File Port Monitor Installation Disk",,,
+
+[Strings]
+PMProducer="Monti Lorenzo"

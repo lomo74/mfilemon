@@ -1,0 +1,256 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Ghostscript / mfilemon HOWTO</title>
+
+<style>
+body {
+width: 75%;
+font-size: 80%;
+font-family: Arial,Helvetica,sans-serif;
+}
+h3 {
+font-family: Verdana;
+}
+code {
+font-size: 120%;
+}
+.para {
+font-family: Verdana;
+font-style: italic;
+line-height: 2em;
+}
+.text {
+}
+.subtitle {
+font-family: Verdana;
+font-style: italic;
+line-height: 3em;
+}
+a {
+text-decoration: none;
+color: green;
+}
+a:hover {
+text-decoration: underline;
+}
+img {
+margin-top: 20px;
+margin-bottom: 20px;
+}
+</style></head>
+<body>
+<h3>HOW TO SETUP A PDF PRINTER FOR WINDOWS<br>
+WITH AUTOMATICALLY CHOSEN FILENAME</h3>
+<span class="subtitle">by Lorenzo Monti (2009)<br>
+<a href="http://www.lorenzomonti.it/">http://www.lorenzomonti.it/</a></span><br>
+<span class="para">1. Introduction</span><br>
+<span class="text">Two years ago, I received a request by
+a customer of mine, asking for a program able to create PDFs out of the
+invoices from his ERP. We had a batch procedure for invoice printing
+and a proprietary PDF printer driver. The only way to go was to connect
+the PDF driver to the FILE: port, but then the user would have been
+forced to input a name for each file. We were talking about hundreds
+of files at a time. After some investigating, I decided to solve this
+problem writing a port monitor able to decide the file name for me. I
+named it Mfilemon (Multi File Port Monitor) and gave it to the public
+domain, under the GPL license.<br>
+<br>
+This document will guide you through
+the process of creating a PDF
+printer for Windows with the ability to automatically choose the output
+filename, using only free software. This can be useful for "batch
+printing", for example to produce PDFs out of an ERP's batch print
+procedure, or in
+any circumstances where an "ask for filename dialog" would be
+uncomfortable or even unfeasible.</span><br>
+<hr style="width: 100%; height: 2px;">
+<span class="para">2.
+What's needed</span>
+<br>
+<span class="text">
+<ul>
+<li>Ghostscript (<a href="http://mirror.cs.wisc.edu/pub/mirrors/ghost/GPL/current/">http://mirror.cs.wisc.edu/pub/mirrors/ghost/GPL/current/</a>)
+</li>
+<li>Mfilemon (<a href="https://sourceforge.net/projects/mfilemon/files/">https://sourceforge.net/projects/mfilemon/files/</a>)</li>
+</ul>
+Once you have downloaded the required software, follow the instructions
+given below.
+</span>
+<hr style="width: 100%; height: 2px;"><span class="para">3.
+Install
+Ghostscript</span>
+<br>
+<span class="text">You will need to install Ghostscript.
+Please keep in mind where you install it to, since we'll
+require it later.<br>
+<img src="images/gsinst.png" style="width: 456px; height: 357px;" alt="Ghostscript installation" title="Ghostscript installation"><br>
+In our example Ghostscript will be placed in C:\Programmi\gs.<br>
+</span>
+<hr style="width: 100%; height: 2px;"><span class="para">4.
+Install Multi File Port Monitor (Mfilemon)</span>
+<br>
+<span class="text">
+Now install Mfilemon. There is nothing to choose during installation,
+except the language (english or italian).
+</span>
+<hr style="width: 100%; height: 2px;"><span class="para">5.
+Install PostScript printer and create the port</span>
+<br>
+<span class="text">
+Once Ghostscript and Mfilemon are installed, we are ready to put them
+all together.<br>
+Go to control panel, printers. Choose Add printer, click Next.<br>
+When you're asked for local or network printer, choose "Local printer"
+and leave the Plug and Play checkbox blank:<br>
+<img src="images/prnwiz1.png" style="width: 503px; height: 392px;" alt="Add printer wizard" title="Add printer wizard"><br>
+Click Next. We must create and configure the port for this printer.<br>
+Choose "Create a new port", and from the drop down list choose "Multi
+File Port Monitor":<br>
+</span>
+<img src="images/prnwiz2.png" style="width: 503px; height: 392px;" alt="New port for the printer" title="New port for the printer"><br>
+Click Next. You are asked for the name of the port:<br>
+<img src="images/portname.png" style="width: 336px; height: 208px;" alt="Choose the port name" title="Choose the port name"><br>
+Let's call it "GhostPDF:", following the Windows tradition of appending
+a colon to printer port names. You can give it the name of your choice,
+though. Click Ok.<br>
+The configuration dialog for the newly created port is shown. Let's
+fill it:<br>
+<img src="images/portconf.png" style="width: 336px; height: 438px;" alt="Port configuration" title="Port configuration"><br>
+Here is an explanation of the various
+parameters:
+<ul>
+<li><strong>Output path</strong> : the directory
+where PDF files will be placed.</li>
+<li><strong>Filename pattern</strong> : a pattern
+made up of various "fields". The filename will be chosen in accordance
+to this pattern.<br>
+A pattern can also include subdirectories, wich will be created "on the
+fly" as needed.<br>
+In our example, we are instructing Mfilemon to create a folder named
+after the current year, month and day (eg. 20090604), then to choose a
+filename composed by the word "file", an integer of four digits ("%i"),
+and the suffix ".pdf" (eg. file0001.pdf). The %i field will grow each
+time, to ensure uniqueness of the filename (unless you choose to
+overwrite existing files, as explained next). If you want to explore
+other fields, click on the "?" button.</li>
+<li><strong>Overwrite existing files</strong> :
+whether an existing file can be overwritten, or a
+new name must be produced according to the pattern.</li>
+<li><strong>User command</strong> : an user defined
+executable that can be invoked to process data from the printer driver.<br>
+In our example, the command line is:<br>
+<code>C:\Programmi\gs\gs8.64\bin\gswin32c.exe -dBATCH -dSAFER
+-dNOPAUSE
+-sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -dAutoRotatePages=/PageByPage
+-r600 -sOutputFile="%f" -</code><br>
+Obviously, the full path to gswin32c.exe depends on the directory where
+Ghostscript was installed to, in step 3.<br>
+Here we are invoking the console Ghostscript interpreter, telling it to
+write PDF (-sDEVICE=pdfwrite)&nbsp;to the file chosen by Mfilemon
+(-sOutputFile="%f") reading its source from standard input (the final
+dash).</li>
+<li><strong>Pipe data to external program</strong>
+: if checked, data coming from the printer driver is sent
+to the "User command" through stdandard input. Else, data is spooled to
+the file
+first, and the "User command" is invoked afterwards.<br>
+In our example, this flag must be true since we instructed Ghostscript
+to read its source from standard input.</li>
+<li><strong>Wait process termination</strong> : if
+checked, the spooler is forced to wait for
+"User command" to exit. Be careful, since long running user commands
+will slow down the spooling process.</li>
+</ul>
+Click Ok. The "Add printer" wizard shows a list of printer models:<br>
+<img style="width: 503px; height: 392px;" alt="Choose printer model" title="Choose printer model" src="images/prnwiz3.png"><br>
+Click on "Have disk", then "Browse", then go to the directory where
+Ghostscript was installed:<br>
+<img style="width: 451px; height: 302px;" alt="Go to Ghostscript installation directory" title="Go to Ghostscript installation directory" src="images/prnwiz4.png"><br>
+Enter the "lib" subdirectory, choose the file "ghostpdf.inf" and click
+Open, then Ok.<br>
+The following dialog appears, telling us that the file we choosed
+provides a printer named "Ghostscript PDF":<br>
+<img style="width: 503px; height: 392px;" alt="Choose the Ghostscript PDF printer" title="Choose the Ghostscript PDF printer" src="images/prnwiz5.png"><br>
+Choose the only available printer and click&nbsp;Next.<br>
+The wizard asks for a name for the printer (let's call it "Ghostscript
+PDF", "Auto PDF" or whatever name you like), whether it should be the
+default printer or not, and so on.<br>
+These tasks are common to all printers, so if&nbsp;you ever
+installed one on your system you don't need&nbsp;step by step
+instructions to finish this task. Only one note: during the copy of the
+driver files, Windows could complain about the missing "Windows Logo"
+certification:<br>
+<img style="width: 396px; height: 315px;" alt="Missing Windows Logo" title="Missing Windows Logo" src="images/warning.png"><br>
+Obviously, tell it to continue.<br>
+We are ready to test our PDF printer!<br>
+Open your favourite program, then print something to your newly created
+printer.<br>
+Go to My Computer, browse to C:\pdf. As you can see, Mfilemon has
+created a subdirectory (in my case, 20090604, that is today), and
+inside it Ghostscript has produced file0001.pdf:<br>
+<img style="width: 797px; height: 459px;" alt="Hurrah, it's working!" title="Hurrah, it's working!" src="images/result.png"><br>
+Print something else and see what happens.<br>
+Have fun!<br>
+<br>
+<br>
+aug 04, 2009<br>
+A further enhancement is the introduction of the so called "search
+fields" (rel 1.3.3 of MFILEMON).<br>
+The goal is to benefit from the ability of Ghostscript to generate
+multiple "single page files" out of a single "multi page input", when
+the output format does not support&nbsp;multiple pages.<br>
+For example, you could want to print a multi-page document to several
+JPEG files, one per page, named as follows:<br>
+file0001-page1.jpg<br>
+file0001-page2.jpg<br>
+file0001-page3.jpg<br>
+file0002-page1.jpg<br>
+file0002-page2.jpg<br>
+and so on.<br>
+Ghostscript has a special syntax for this purpose: the use (surprise!)
+of special tags in the filename, which will be substituted at runtime.
+The tag %d will become the page number.<br>
+So, MFILEMON has to generate a filename, let's say,
+"file0001-page%d.jpg", and pass it&nbsp;to Ghostscript, which in turn will
+substitute %d with "1", "2", "3", and so on.<br>
+And here comes the complexity.<br>
+Since a file named exactly "file0001-page%d.jpg" will <span style="font-weight: bold;">never</span> exist on disk
+due to the Ghostscript tag manipulation, MFILEMON will <span style="font-weight: bold;">always</span> choose this
+file name, considering it available, and overwriting any existing file
+with that name.<br>
+We need a mechanism to tell MFILEMON:<br>
+<ul>
+<li>search for files whose name is <span style="font-weight: bold;">like</span>
+file0001-page*.jpg; if you find any, keep trying with the next number:
+file0002-page*.jpg, file0003-page*.jpg, and so on, until you find one
+that is available;</li>
+</ul>
+<ul>
+<li><span style="font-weight: bold;">then</span>,
+generate a filename for Ghostscript, including the special tag %d.</li>
+</ul>
+The syntax for declaring a "search field" is:<br>
+<code>|literal|searchstring|</code><br>
+where <code>literal</code> is interpreted "as is", without
+substitution done by
+MFILEMON, and <code>searchstring</code> is the string used
+for the search of the
+next available filename. Obviously, <code>searchstring</code>
+can contain wildcards.<br>
+An example will clarify.<br>
+Let's say we want to print each page of our documents to&nbsp;JPEG
+files.<br>
+We configure MFILEMON as follows:<br>
+User command = <code>C:\Programmi\gs\gs8.64\bin\gswin32c.exe
+-dBATCH -dSAFER
+-dNOPAUSE
+-sDEVICE=jpeg -dJPEGQ=85 -r200 -sOutputFile="%f" -</code><br>
+Filename pattern = <code>file%i-page|%d|*|.jpg</code><br>We are telling MFILEMON: use * during search, and %d when it comes to produce the&nbsp;output.<br>Let's say we have a three-pages document and print it.<br>This will produce:<br>file0001-page1.jpg<br>file0001-page2.jpg<br>file0001-page3.jpg<br>Now suppose we have another two-pages document and print it.<br>MFILEMON will start from %i=0001, and search for a file whose name is like&nbsp;file0001-page*.jpg (using the <code>searchstring</code>).<br>It will find three files, and proceed with the next number: 0002.<br>Since
+it won't find anything&nbsp;matching the name
+file0002-page*.jpg,&nbsp;it will stop searching and produce the
+filename using the <code>literal</code>.<br>
+Thus, the filename chosen by MFILEMON will be file0002-page%d.jpg, which&nbsp;Ghostscript, in turn, will translate to<br>file0002-page1.jpg<br>file0002-page2.jpg<br>That's all!<br><br>
+<hr style="width: 100%; height: 2px;">
+<h6>Copyright © 2009
+Monti Lorenzo.</h6>
+</body></html>

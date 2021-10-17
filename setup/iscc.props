@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup
+    Condition="'$(ISCCBeforeTargets)' == '' and '$(ISCCAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
+    <ISCCBeforeTargets>Midl</ISCCBeforeTargets>
+    <ISCCAfterTargets>CustomBuild</ISCCAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ISCCDependsOn
+      Condition="'$(ConfigurationType)' != 'Makefile'">_SelectedFiles;$(ISCCDependsOn)</ISCCDependsOn>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ISCC>
+      <OutputPath>$(ProjectDir)Output</OutputPath>
+      <OutputFileName>$(SolutionName)-setup</OutputFileName>
+      <Quiet>False</Quiet>
+      <CommandLineTemplate>"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" [AllOptions] [AdditionalOptions] [Inputs]</CommandLineTemplate>
+      <Outputs>%(OutputPath)\%(OutputFileName)</Outputs>
+      <ExecutionDescription>Creating setup...</ExecutionDescription>
+    </ISCC>
+  </ItemDefinitionGroup>
+</Project>

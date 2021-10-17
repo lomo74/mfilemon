@@ -1,0 +1,33 @@
+program enum_printproc;
+
+{$APPTYPE CONSOLE}
+
+uses
+  SysUtils,
+  Windows,
+  WinSpool;
+
+var
+  buffer: Pointer;
+  cbNeeded, cReturned, I: DWORD;
+  ppi: ^PRINTPROCESSOR_INFO_1;
+
+begin
+  try
+    if not EnumPrintProcessors(nil, nil, 1, nil, 0, cbNeeded, cReturned) and
+    (GetLastError = ERROR_INSUFFICIENT_BUFFER) then begin
+      GetMem(buffer, cbNeeded);
+      if EnumPrintProcessors(nil, nil, 1, buffer, cbNeeded, cbNeeded, cReturned) then begin
+        Cardinal(ppi) := Cardinal(buffer);
+        for I := 1 to cReturned do begin
+          Writeln(ppi^.pName);
+          Inc(ppi);
+        end;
+      end;
+      FreeMem(buffer);
+    end;
+  except
+    on E: Exception do
+      Writeln(E.ClassName, ': ', E.Message);
+  end;
+end.

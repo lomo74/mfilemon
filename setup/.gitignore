@@ -1,0 +1,5 @@
+Build/
+Output/
+Debug/
+Release/
+*.vcxproj.user
