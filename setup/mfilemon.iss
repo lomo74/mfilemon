@@ -87,7 +87,7 @@ Source: "..\win32\release-ita\mfilemonUI.dll"; DestDir: "{sys}"; Flags: promptif
 Source: "..\misc\docs\ghostscript-mfilemon-howto.html"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\misc\docs\images\*"; DestDir: "{app}\images"; Flags: ignoreversion
 Source: "release\setuphlp.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\conf\*"; DestDir: "{app}\conf"; Flags: ignoreversion
+Source: "..\misc\conf\*"; DestDir: "{app}\conf"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\ghostscript-mfilemon howto"; Filename: "{app}\ghostscript-mfilemon-howto.html"; WorkingDir: "{app}";

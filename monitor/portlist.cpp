@@ -131,30 +131,30 @@ LPBYTE CPortList::CopyPortToBuffer(CPort* pPort, DWORD dwLevel, LPBYTE pStart, L
 	{
 	case 1:
 		{
-			PORT_INFO_1W* pPortInfo = (PORT_INFO_1W*)pStart;
+			PORT_INFO_1W* pPortInfo = reinterpret_cast<PORT_INFO_1W*>(pStart);
 			len = wcslen(pPort->PortName()) + 1;
 			pEnd -= len * sizeof(WCHAR);
-			wcscpy_s((LPWSTR)pEnd, len, pPort->PortName());
-			pPortInfo->pName = (LPWSTR)pEnd;
+			wcscpy_s(reinterpret_cast<LPWSTR>(pEnd), len, pPort->PortName());
+			pPortInfo->pName = reinterpret_cast<LPWSTR>(pEnd);
 			break;
 		}
 	case 2:
 		{
-			PORT_INFO_2W* pPortInfo = (PORT_INFO_2W*)pStart;
+			PORT_INFO_2W* pPortInfo = reinterpret_cast<PORT_INFO_2W*>(pStart);
 			len = wcslen(m_szMonitorName) + 1;
 			pEnd -= len * sizeof(WCHAR);
-			wcscpy_s((LPWSTR)pEnd, len, m_szMonitorName);
-			pPortInfo->pMonitorName = (LPWSTR)pEnd;
+			wcscpy_s(reinterpret_cast<LPWSTR>(pEnd), len, m_szMonitorName);
+			pPortInfo->pMonitorName = reinterpret_cast<LPWSTR>(pEnd);
 
 			len = wcslen(m_szPortDesc) + 1;
 			pEnd -= len * sizeof(WCHAR);
-			wcscpy_s((LPWSTR)pEnd, len, m_szPortDesc);
-			pPortInfo->pDescription = (LPWSTR)pEnd;
+			wcscpy_s(reinterpret_cast<LPWSTR>(pEnd), len, m_szPortDesc);
+			pPortInfo->pDescription = reinterpret_cast<LPWSTR>(pEnd);
 
 			len = wcslen(pPort->PortName()) + 1;
 			pEnd -= len * sizeof(WCHAR);
-			wcscpy_s((LPWSTR)pEnd, len, pPort->PortName());
-			pPortInfo->pPortName = (LPWSTR)pEnd;
+			wcscpy_s(reinterpret_cast<LPWSTR>(pEnd), len, pPort->PortName());
+			pPortInfo->pPortName = reinterpret_cast<LPWSTR>(pEnd);
 
 			pPortInfo->fPortType = 0;
 			pPortInfo->Reserved = 0;
@@ -164,7 +164,7 @@ LPBYTE CPortList::CopyPortToBuffer(CPort* pPort, DWORD dwLevel, LPBYTE pStart, L
 		break;
 	}
 
-    return pEnd;
+	return pEnd;
 }
 
 //-------------------------------------------------------------------------------------
@@ -279,7 +279,7 @@ void CPortList::DeletePort(CPort* pPortToDelete)
 void CPortList::RemoveFromRegistry(CPort* pPort)
 {
 	PMONITORREG pReg = g_pMonitorInit->pMonitorReg;
-	HKEY hRoot = (HKEY)g_pMonitorInit->hckRegistryRoot;
+	HKEY hRoot = static_cast<HKEY>(g_pMonitorInit->hckRegistryRoot);
 
 	//If we're on an UAC enabled system, we're running under unprivileged
 	//user account. Let's revert to ourselves for a while...
@@ -296,7 +296,8 @@ void CPortList::RemoveFromRegistry(CPort* pPort)
 	//let's revert to unprivileged user
 	if (hToken)
 	{
-		SetThreadToken(NULL, hToken);
+		if (!SetThreadToken(NULL, hToken))
+			g_pLog->Error(L"CPortList::RemoveFromRegistry: SetThreadToken failed (%i)", GetLastError());
 		CloseHandle(hToken);
 		g_pLog->Debug(L"back to unprivileged user");
 	}
@@ -308,28 +309,13 @@ void CPortList::LoadFromRegistry()
 	LPPORTCONFIG pConfig = new PORTCONFIG;
 	LPBYTE pwBlob = new BYTE[MAX_PWBLOB];
 
-	/*
-	LPWSTR szPortName = new WCHAR[MAX_PATH + 1];
-	LPWSTR szOutputPath = new WCHAR[MAX_PATH + 1];
-	LPWSTR szFilePattern = new WCHAR[MAX_PATH + 1];
-	LPWSTR szUserCommandPattern = new WCHAR[MAX_USERCOMMMAND];
-	LPWSTR szExecPath = new WCHAR[MAX_PATH + 1];
-	LPWSTR szUser = new WCHAR[MAX_USER];
-	LPWSTR szDomain = new WCHAR[MAX_DOMAIN];
-	LPWSTR szPassword = new WCHAR[MAX_PASSWORD];
-	BOOL bOverwrite;
-	BOOL bWaitTermination;
-	DWORD dwWaitTimeout;
-	BOOL bPipeData;
-	BOOL bHideProcess;
-	*/
 #ifdef __GNUC__
 	HANDLE hKey;
 #else
 	HKEY hKey;
 #endif
 	PMONITORREG pReg = g_pMonitorInit->pMonitorReg;
-	HKEY hRoot = (HKEY)g_pMonitorInit->hckRegistryRoot;
+	HKEY hRoot = static_cast<HKEY>(g_pMonitorInit->hckRegistryRoot);
 	DWORD index = 0;
 	DWORD cchName;
 	DWORD cbData;
@@ -338,7 +324,7 @@ void CPortList::LoadFromRegistry()
 	DWORD nLogLevel = LOGLEVEL_NONE;
 
 	cbData = sizeof(nLogLevel);
-	if (pReg->fpQueryValue(hRoot, szLogLevelKey, NULL, (LPBYTE)&nLogLevel, &cbData,
+	if (pReg->fpQueryValue(hRoot, szLogLevelKey, NULL, reinterpret_cast<LPBYTE>(&nLogLevel), &cbData,
 		g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 	{
 		nLogLevel = LOGLEVEL_NONE;
@@ -363,16 +349,16 @@ void CPortList::LoadFromRegistry()
 
 		//read OutputPath
 		cbData = sizeof(pConfig->szOutputPath);
-		if (pReg->fpQueryValue(hKey, szOutputPathKey, NULL, (LPBYTE)pConfig->szOutputPath, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szOutputPathKey, NULL, reinterpret_cast<LPBYTE>(pConfig->szOutputPath),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			continue;
 		else
 			pConfig->szOutputPath[cbData / sizeof(WCHAR)] = L'\0';
 
 		//read FilePattern
 		cbData = sizeof(pConfig->szFilePattern);
-		if (pReg->fpQueryValue(hKey, szFilePatternKey, NULL, (LPBYTE)pConfig->szFilePattern, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szFilePatternKey, NULL, reinterpret_cast<LPBYTE>(pConfig->szFilePattern),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			continue;
 		else
 			pConfig->szFilePattern[cbData / sizeof(WCHAR)] = L'\0';
@@ -381,13 +367,13 @@ void CPortList::LoadFromRegistry()
 
 		//read Overwrite
 		cbData = sizeof(pConfig->bOverwrite);
-		if (pReg->fpQueryValue(hKey, szOverwriteKey, NULL, (LPBYTE)&pConfig->bOverwrite, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szOverwriteKey, NULL, reinterpret_cast<LPBYTE>(&pConfig->bOverwrite),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			continue;
 
 		//read UserCommand
 		cbData = sizeof(pConfig->szUserCommandPattern);
-		if (pReg->fpQueryValue(hKey, szUserCommandPatternKey, NULL, (LPBYTE)pConfig->szUserCommandPattern,
+		if (pReg->fpQueryValue(hKey, szUserCommandPatternKey, NULL, reinterpret_cast<LPBYTE>(pConfig->szUserCommandPattern),
 			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			*pConfig->szUserCommandPattern = L'\0';
 		else
@@ -395,40 +381,40 @@ void CPortList::LoadFromRegistry()
 
 		//read ExecPath
 		cbData = sizeof(pConfig->szExecPath);
-		if (pReg->fpQueryValue(hKey, szExecPathKey, NULL, (LPBYTE)pConfig->szExecPath, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szExecPathKey, NULL, reinterpret_cast<LPBYTE>(pConfig->szExecPath),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			*pConfig->szExecPath = L'\0';
 		else
 			pConfig->szExecPath[cbData / sizeof(WCHAR)] = L'\0';
 
 		//read Wait termination
 		cbData = sizeof(pConfig->bWaitTermination);
-		if (pReg->fpQueryValue(hKey, szWaitTerminationKey, NULL, (LPBYTE)&pConfig->bWaitTermination, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szWaitTerminationKey, NULL, reinterpret_cast<LPBYTE>(&pConfig->bWaitTermination),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			pConfig->bWaitTermination = FALSE;
 
 		//read Wait timeout
 		cbData = sizeof(pConfig->dwWaitTimeout);
-		if (pReg->fpQueryValue(hKey, szWaitTimeoutKey, NULL, (LPBYTE)&pConfig->dwWaitTimeout, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szWaitTimeoutKey, NULL, reinterpret_cast<LPBYTE>(&pConfig->dwWaitTimeout),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			pConfig->dwWaitTimeout = 10;
 
 		//read Pipe data
 		cbData = sizeof(pConfig->bPipeData);
-		if (pReg->fpQueryValue(hKey, szPipeDataKey, NULL, (LPBYTE)&pConfig->bPipeData, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szPipeDataKey, NULL, reinterpret_cast<LPBYTE>(&pConfig->bPipeData),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			pConfig->bPipeData = FALSE;
 
 		//read Hide process
 		cbData = sizeof(pConfig->bHideProcess);
-		if (pReg->fpQueryValue(hKey, szHideProcessKey, NULL, (LPBYTE)&pConfig->bHideProcess, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szHideProcessKey, NULL, reinterpret_cast<LPBYTE>(&pConfig->bHideProcess),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			pConfig->bHideProcess = TRUE;
 
 		//read User
 		cbData = sizeof(pConfig->szUser);
-		if (pReg->fpQueryValue(hKey, szUserKey, NULL, (LPBYTE)pConfig->szUser, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szUserKey, NULL, reinterpret_cast<LPBYTE>(pConfig->szUser),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			*pConfig->szUser = L'\0';
 		else
 			pConfig->szUser[cbData / sizeof(WCHAR)] = L'\0';
@@ -437,8 +423,8 @@ void CPortList::LoadFromRegistry()
 
 		//read Domain
 		cbData = sizeof(pConfig->szDomain);
-		if (pReg->fpQueryValue(hKey, szDomainKey, NULL, (LPBYTE)pConfig->szDomain, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+		if (pReg->fpQueryValue(hKey, szDomainKey, NULL, reinterpret_cast<LPBYTE>(pConfig->szDomain),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
 			*pConfig->szDomain = L'\0';
 		else
 			pConfig->szDomain[cbData / sizeof(WCHAR)] = L'\0';
@@ -447,8 +433,8 @@ void CPortList::LoadFromRegistry()
 
 		//read Password
 		cbData = MAX_PWBLOB;
-		if (pReg->fpQueryValue(hKey, szPasswordKey, NULL, (LPBYTE)pwBlob, &cbData,
-			g_pMonitorInit->hSpooler) != ERROR_SUCCESS || cbData < 32)
+		if (pReg->fpQueryValue(hKey, szPasswordKey, NULL, reinterpret_cast<LPBYTE>(pwBlob),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS || cbData < 32)
 			*pConfig->szPassword = L'\0';
 		else
 		{
@@ -460,8 +446,8 @@ void CPortList::LoadFromRegistry()
 
 			if (ctx &&
 				EVP_DecryptInit(ctx, EVP_aes_256_cbc(), aeskey, iv) &&
-				EVP_DecryptUpdate(ctx, (LPBYTE)pConfig->szPassword, &outlen1, pwData, cbData - 16) &&
-				EVP_DecryptFinal(ctx, (LPBYTE)pConfig->szPassword + outlen1, &outlen2) &&
+				EVP_DecryptUpdate(ctx, reinterpret_cast<LPBYTE>(pConfig->szPassword), &outlen1, pwData, cbData - 16) &&
+				EVP_DecryptFinal(ctx, reinterpret_cast<LPBYTE>(pConfig->szPassword + outlen1), &outlen2) &&
 				EVP_CIPHER_CTX_cleanup(ctx))
 			{
 				int len = (static_cast<unsigned long long>(outlen1) + outlen2) / sizeof(WCHAR);
@@ -500,7 +486,7 @@ void CPortList::SaveToRegistry()
 	HKEY hKey;
 #endif
 	PMONITORREG pReg = g_pMonitorInit->pMonitorReg;
-	HKEY hRoot = (HKEY)g_pMonitorInit->hckRegistryRoot;
+	HKEY hRoot = static_cast<HKEY>(g_pMonitorInit->hckRegistryRoot);
 	LPBYTE pwBlob = new BYTE[MAX_PWBLOB];
 
 	CAutoCriticalSection acs(GetCriticalSection());
@@ -528,62 +514,68 @@ void CPortList::SaveToRegistry()
 		if (pReg->fpCreateKey(hRoot, pPortRec->m_pPort->PortName(), 0, KEY_WRITE,
 			NULL, &hKey, NULL, g_pMonitorInit->hSpooler) == ERROR_SUCCESS)
 		{
-			LPCWSTR szBuf;
+			LPWSTR szBuf;
 
 			//OutputPath
-			szBuf = pPortRec->m_pPort->OutputPath();
-			pReg->fpSetValue(hKey, szOutputPathKey, REG_SZ, (LPBYTE)szBuf,
-				(DWORD)wcslen(szBuf) * sizeof(WCHAR), g_pMonitorInit->hSpooler);
+			szBuf = _wcsdup(pPortRec->m_pPort->OutputPath());
+			pReg->fpSetValue(hKey, szOutputPathKey, REG_SZ, reinterpret_cast<LPBYTE>(szBuf),
+				static_cast<DWORD>(wcslen(szBuf) * sizeof(WCHAR)), g_pMonitorInit->hSpooler);
+			free(szBuf);
 
 			//FilePattern
-			szBuf = pPortRec->m_pPort->FilePattern();
-			pReg->fpSetValue(hKey, szFilePatternKey, REG_SZ, (LPBYTE)szBuf,
-				(DWORD)wcslen(szBuf) * sizeof(WCHAR), g_pMonitorInit->hSpooler);
+			szBuf = _wcsdup(pPortRec->m_pPort->FilePattern());
+			pReg->fpSetValue(hKey, szFilePatternKey, REG_SZ, reinterpret_cast<LPBYTE>(szBuf),
+				static_cast<DWORD>(wcslen(szBuf) * sizeof(WCHAR)), g_pMonitorInit->hSpooler);
+			free(szBuf);
 
 			//Overwrite
 			BOOL bOverwrite = pPortRec->m_pPort->Overwrite();
-			pReg->fpSetValue(hKey, szOverwriteKey, REG_DWORD, (LPBYTE)&bOverwrite,
+			pReg->fpSetValue(hKey, szOverwriteKey, REG_DWORD, reinterpret_cast<LPBYTE>(&bOverwrite),
 				sizeof(bOverwrite), g_pMonitorInit->hSpooler);
 
 			//UserCommand
-			szBuf = pPortRec->m_pPort->UserCommandPattern();
-			pReg->fpSetValue(hKey, szUserCommandPatternKey, REG_SZ, (LPBYTE)szBuf,
-				(DWORD)wcslen(szBuf) * sizeof(WCHAR), g_pMonitorInit->hSpooler);
+			szBuf = _wcsdup(pPortRec->m_pPort->UserCommandPattern());
+			pReg->fpSetValue(hKey, szUserCommandPatternKey, REG_SZ, reinterpret_cast<LPBYTE>(szBuf),
+				static_cast<DWORD>(wcslen(szBuf) * sizeof(WCHAR)), g_pMonitorInit->hSpooler);
+			free(szBuf);
 
 			//OutputPath
-			szBuf = pPortRec->m_pPort->ExecPath();
-			pReg->fpSetValue(hKey, szExecPathKey, REG_SZ, (LPBYTE)szBuf,
-				(DWORD)wcslen(szBuf) * sizeof(WCHAR), g_pMonitorInit->hSpooler);
+			szBuf = _wcsdup(pPortRec->m_pPort->ExecPath());
+			pReg->fpSetValue(hKey, szExecPathKey, REG_SZ, reinterpret_cast<LPBYTE>(szBuf),
+				static_cast<DWORD>(wcslen(szBuf) * sizeof(WCHAR)), g_pMonitorInit->hSpooler);
+			free(szBuf);
 
 			//Wait termination
 			BOOL bWaitTermination = pPortRec->m_pPort->WaitTermination();
-			pReg->fpSetValue(hKey, szWaitTerminationKey, REG_DWORD, (LPBYTE)&bWaitTermination,
+			pReg->fpSetValue(hKey, szWaitTerminationKey, REG_DWORD, reinterpret_cast<LPBYTE>(&bWaitTermination),
 				sizeof(bWaitTermination), g_pMonitorInit->hSpooler);
 
 			//Wait timeout
 			DWORD dwWaitTimeout = pPortRec->m_pPort->WaitTimeout();
-			pReg->fpSetValue(hKey, szWaitTimeoutKey, REG_DWORD, (LPBYTE)&dwWaitTimeout,
+			pReg->fpSetValue(hKey, szWaitTimeoutKey, REG_DWORD, reinterpret_cast<LPBYTE>(&dwWaitTimeout),
 				sizeof(dwWaitTimeout), g_pMonitorInit->hSpooler);
 
 			//Pipe data
 			BOOL bPipeData = pPortRec->m_pPort->PipeData();
-			pReg->fpSetValue(hKey, szPipeDataKey, REG_DWORD, (LPBYTE)&bPipeData,
+			pReg->fpSetValue(hKey, szPipeDataKey, REG_DWORD, reinterpret_cast<LPBYTE>(&bPipeData),
 				sizeof(bPipeData), g_pMonitorInit->hSpooler);
 
 			//Hide process
 			BOOL bHideProcess = pPortRec->m_pPort->HideProcess();
-			pReg->fpSetValue(hKey, szHideProcessKey, REG_DWORD, (LPBYTE)&bHideProcess,
+			pReg->fpSetValue(hKey, szHideProcessKey, REG_DWORD, reinterpret_cast<LPBYTE>(&bHideProcess),
 				sizeof(bHideProcess), g_pMonitorInit->hSpooler);
 
 			//User
-			szBuf = pPortRec->m_pPort->User();
-			pReg->fpSetValue(hKey, szUserKey, REG_SZ, (LPBYTE)szBuf,
-				(DWORD)wcslen(szBuf) * sizeof(WCHAR), g_pMonitorInit->hSpooler);
+			szBuf = _wcsdup(pPortRec->m_pPort->User());
+			pReg->fpSetValue(hKey, szUserKey, REG_SZ, reinterpret_cast<LPBYTE>(szBuf),
+				static_cast<DWORD>(wcslen(szBuf) * sizeof(WCHAR)), g_pMonitorInit->hSpooler);
+			free(szBuf);
 
 			//Domain
-			szBuf = pPortRec->m_pPort->Domain();
-			pReg->fpSetValue(hKey, szDomainKey, REG_SZ, (LPBYTE)szBuf,
-				(DWORD)wcslen(szBuf) * sizeof(WCHAR), g_pMonitorInit->hSpooler);
+			szBuf = _wcsdup(pPortRec->m_pPort->Domain());
+			pReg->fpSetValue(hKey, szDomainKey, REG_SZ, reinterpret_cast<LPBYTE>(szBuf),
+				static_cast<DWORD>(wcslen(szBuf) * sizeof(WCHAR)), g_pMonitorInit->hSpooler);
+			free(szBuf);
 
 			//Password
 			LPBYTE iv = pwBlob;
@@ -596,9 +588,10 @@ void CPortList::SaveToRegistry()
 
 			EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
+			szBuf = _wcsdup(pPortRec->m_pPort->Password());
 			if (ctx &&
 				EVP_EncryptInit(ctx, EVP_aes_256_cbc(), aeskey, iv) &&
-				EVP_EncryptUpdate(ctx, pData, &outlen1, (LPBYTE)pPortRec->m_pPort->Password(), len) &&
+				EVP_EncryptUpdate(ctx, pData, &outlen1, reinterpret_cast<LPBYTE>(szBuf), len) &&
 				EVP_EncryptFinal(ctx, pData + outlen1, &outlen2) &&
 				EVP_CIPHER_CTX_cleanup(ctx))
 			{
@@ -608,6 +601,7 @@ void CPortList::SaveToRegistry()
 			}
 			else
 				pReg->fpSetValue(hKey, szPasswordKey, REG_BINARY, pwBlob, 0, g_pMonitorInit->hSpooler);
+			free(szBuf);
 
 			if (ctx)
 				EVP_CIPHER_CTX_free(ctx);
@@ -624,7 +618,8 @@ void CPortList::SaveToRegistry()
 	//let's revert to unprivileged user
 	if (hToken)
 	{
-		SetThreadToken(NULL, hToken);
+		if (!SetThreadToken(NULL, hToken))
+			g_pLog->Error(L"CPortList::SaveToRegistry: SetThreadToken failed (%i)", GetLastError());
 		CloseHandle(hToken);
 		g_pLog->Debug(L"back to unprivileged user");
 	}

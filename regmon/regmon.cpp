@@ -52,34 +52,33 @@ static BOOL ListRegisteredMonitors()
 	DWORD pcbNeeded = 0;
 	DWORD pcReturned = 0;
 
-	EnumMonitors(NULL, 2, (LPBYTE)NULL, 0, &pcbNeeded, &pcReturned);
+	EnumMonitors(NULL, 2, NULL, 0, &pcbNeeded, &pcReturned);
 	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
 	{
 		//_tprintf(_T("%s\n"), "ERROR_INSUFFICIENT_BUFFER");
 		return FALSE;
 	}
 
-	LPBYTE pPorts = (LPBYTE)malloc(sizeof(BYTE)*pcbNeeded);
-	memset(pPorts, 0, sizeof(BYTE)*pcbNeeded);
+	LPBYTE pPorts = new BYTE[pcbNeeded];
+	ZeroMemory(pPorts, sizeof(BYTE) * pcbNeeded);
 	BOOL result = EnumMonitors(NULL, 2, pPorts, pcbNeeded, &pcbNeeded, &pcReturned);
 	if (!result)
 	{
 		DWORD dwErr = GetLastError();
-		free(pPorts);
+		delete[] pPorts;
 		SetLastError(dwErr);
-		//_tprintf(_T("%s\n"), "Could not get monitors.");
 		return FALSE;
 	}
 
-	MONITOR_INFO_2 *pinfo = (MONITOR_INFO_2*)pPorts;
+	MONITOR_INFO_2 *pinfo = reinterpret_cast<MONITOR_INFO_2*>(pPorts);
 
-	for (DWORD i = 0; i < pcReturned; i++)
+	for (; pcReturned-- > 0; pinfo++)
 	{
-		_tprintf(_T("%s\n"), pinfo[i].pName);
+		_tprintf(_T("%s\n"), pinfo->pName);
 	}
 
-	free(pPorts);
-	
+	delete[] pPorts;
+
 	return TRUE;
 }
 
@@ -110,9 +109,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	else if (argc > 1 && _tcsicmp(argv[1], _T("-l")) == 0)
 	{
 		szAction = _T("ListMonitors");
-		//_tprintf(_T("%s\n"), L"Start list monitors...");
 		ret = ListRegisteredMonitors();
-		//_tprintf(_T("%s\n\n"), L"End list monitors...");
 	}
 	else
 	{

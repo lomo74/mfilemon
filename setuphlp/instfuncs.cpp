@@ -19,22 +19,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "stdafx.h"
 
-static const LPWSTR pMonitorName = L"Multi File Port Monitor";
+static const LPCWSTR pMonitorName = L"Multi File Port Monitor";
 
 BOOL __stdcall RegisterMonitor()
 {
 	MONITOR_INFO_2W minfo = { 0 };
 
-	minfo.pName = pMonitorName;
+	minfo.pName = _wcsdup(pMonitorName);
 	minfo.pEnvironment = NULL;
-	minfo.pDLLName = L"mfilemon.dll";
+	minfo.pDLLName = _wcsdup(L"mfilemon.dll");
 
-	return AddMonitorW(NULL, 2, (LPBYTE)&minfo);
+	BOOL bRet = AddMonitorW(NULL, 2, (LPBYTE)&minfo);
+
+	if (minfo.pName)
+		free(minfo.pName);
+
+	if (minfo.pDLLName)
+		free(minfo.pDLLName);
+
+	return bRet;
 }
 
 BOOL __stdcall UnregisterMonitor()
 {
-	return DeleteMonitorW(NULL, NULL, pMonitorName);
+	LPWSTR strName = _wcsdup(pMonitorName);
+
+	BOOL bRet = DeleteMonitorW(NULL, NULL, strName);
+
+	if (strName)
+		free(strName);
+
+	return bRet;
 }
 
 BOOL __stdcall IsMonitorRegistered()
@@ -42,31 +57,31 @@ BOOL __stdcall IsMonitorRegistered()
 	DWORD pcbNeeded = 0;
 	DWORD pcReturned = 0;
 
-	EnumMonitorsW(NULL, 2, (LPBYTE)NULL, 0, &pcbNeeded, &pcReturned);
+	EnumMonitorsW(NULL, 2, NULL, 0, &pcbNeeded, &pcReturned);
 	if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
 		return TRUE;
 
-	LPBYTE pPorts = (LPBYTE)malloc(sizeof(BYTE)*pcbNeeded);
+	LPBYTE pPorts = new BYTE[pcbNeeded];
 	memset(pPorts, 0, sizeof(BYTE)*pcbNeeded);
 	BOOL result = EnumMonitorsW(NULL, 2, pPorts, pcbNeeded, &pcbNeeded, &pcReturned);
 	if (!result)
 	{
-		free(pPorts);
+		delete[] pPorts;
 		return TRUE;
 	}
 
-	MONITOR_INFO_2W *pinfo = (MONITOR_INFO_2W*)pPorts;
+	MONITOR_INFO_2W *pinfo = reinterpret_cast<MONITOR_INFO_2W*>(pPorts);
 
 	for (DWORD i = 0; i < pcReturned; i++)
 	{
 		if (wcscmp(pMonitorName, pinfo[i].pName) == 0)
 		{
-			free(pPorts);
+			delete[] pPorts;
 			return TRUE;
 		}
 	}
 
-	free(pPorts);
-	
+	delete[] pPorts;
+
 	return FALSE;
 }

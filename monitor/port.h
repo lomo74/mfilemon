@@ -39,7 +39,6 @@ public:
 	CPattern* GetPattern() const { return m_pPattern; }
 	void SetFilePatternString(LPCWSTR szPattern);
 	void SetUserCommandString(LPCWSTR szPattern);
-	BOOL BuildCommandLine();
 	BOOL StartJob(DWORD nJobId, LPWSTR szJobTitle, LPWSTR szPrinterName);
 	DWORD CreateOutputFile();
 	BOOL WriteToFile(LPCVOID lpBuffer, DWORD cbBuffer,
@@ -62,12 +61,12 @@ public:
 	BOOL HideProcess() const { return m_bHideProcess; }
 	LPWSTR PrinterName() const { return m_szPrinterName; }
 	DWORD JobId() const { return m_nJobId; }
-	LPWSTR JobTitle() const;
+	LPCWSTR JobTitle() const;
 	LPCWSTR UserName() const;
 	LPCWSTR ComputerName() const;
-	LPWSTR FileName() const { return (LPWSTR)m_szFileName; }
-	LPWSTR Path() const { return (LPWSTR)m_szParent; }
-	LPWSTR Bin() const;
+	LPCWSTR FileName() const { return m_szFileName; }
+	LPCWSTR Path() const { return m_szParent; }
+	LPCWSTR Bin() const;
 	LPCWSTR User() const { return m_szUser; }
 	LPCWSTR Domain() const { return m_szDomain; }
 	LPCWSTR Password() const { return m_szPassword; }

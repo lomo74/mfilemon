@@ -58,7 +58,7 @@ BOOL WINAPI MfmOpenPort(HANDLE hMonitor, LPWSTR pName, PHANDLE pHandle)
 	g_pLog->Debug(L"MfmOpenPort called (%s)", pName);
 
 	CPort* pPort = g_pPortList->FindPort(pName);
-	*pHandle = (HANDLE)pPort;
+	*pHandle = static_cast<HANDLE>(pPort);
 	if (!pPort)
 	{
 		g_pLog->Critical(L"MfmOpenPort: can't find port %s", pName);
@@ -102,8 +102,8 @@ BOOL WINAPI MfmStartDocPort(HANDLE hPort, LPWSTR pPrinterName, DWORD JobId,
 		return FALSE;
 	}
 
-	CPort* pPort = (CPort*)hPort;
-	DOC_INFO_1W* pdi = (DOC_INFO_1W*)pDocInfo;
+	CPort* pPort = static_cast<CPort*>(hPort);
+	DOC_INFO_1W* pdi = reinterpret_cast<DOC_INFO_1W*>(pDocInfo);
 
 	g_pLog->Debug(L"MfmStartDocPort called (%s)", pPort->PortName());
 
@@ -142,7 +142,7 @@ BOOL WINAPI MfmWritePort(HANDLE hPort, LPBYTE pBuffer,
 		return FALSE;
 	}
 
-	CPort* pPort = (CPort*)hPort;
+	CPort* pPort = static_cast<CPort*>(hPort);
 
 	g_pLog->Debug(L"MfmWritePort called (%s)", pPort->PortName());
 
@@ -201,7 +201,7 @@ BOOL WINAPI MfmEndDocPort(HANDLE hPort)
 		return FALSE;
 	}
 
-	CPort* pPort = (CPort*)hPort;
+	CPort* pPort = static_cast<CPort*>(hPort);
 
 	g_pLog->Debug(L"MfmEndDocPort called (%s)", pPort->PortName());
 
@@ -229,18 +229,18 @@ BOOL WINAPI MfmXcvOpenPort(HANDLE hMonitor, LPCWSTR pszObject,
 	UNREFERENCED_PARAMETER(hMonitor);
 
 	g_pLog->Debug(L"MfmXcvOpenPort called (%s), GrantedAccess = %u",
-		(LPWSTR)pszObject, GrantedAccess);
+		pszObject, GrantedAccess);
 
 	LPXCVDATA pXCVDATA = new XCVDATA;
 
-	*phXcv = (HANDLE)pXCVDATA;
+	*phXcv = static_cast<HANDLE>(pXCVDATA);
 
 	if (pszObject)
-		pXCVDATA->pPort = g_pPortList->FindPort((LPWSTR)pszObject);
+		pXCVDATA->pPort = g_pPortList->FindPort(pszObject);
 
 	pXCVDATA->GrantedAccess = GrantedAccess;
 
-	g_pLog->Debug(L"MfmXcvOpenPort returning TRUE (%s)", (LPWSTR)pszObject);
+	g_pLog->Debug(L"MfmXcvOpenPort returning TRUE (%s)", pszObject);
 
 	return TRUE;
 }
@@ -252,7 +252,7 @@ DWORD WINAPI MfmXcvDataPort(HANDLE hXcv, LPCWSTR pszDataName, PBYTE pInputData,
 {
 	g_pLog->Debug(L"MfmXcvDataPort called (%s)", pszDataName);
 
-	LPXCVDATA pXCVDATA = (LPXCVDATA)hXcv;
+	LPXCVDATA pXCVDATA = static_cast<LPXCVDATA>(hXcv);
 
 	if (wcscmp(pszDataName, L"AddPort") == 0)
 	{
@@ -264,7 +264,7 @@ DWORD WINAPI MfmXcvDataPort(HANDLE hXcv, LPCWSTR pszDataName, PBYTE pInputData,
 					pXCVDATA->GrantedAccess);
 				return ERROR_ACCESS_DENIED;
 			}
-			pXCVDATA->pPort = new CPort((LPWSTR)pInputData);
+			pXCVDATA->pPort = new CPort(reinterpret_cast<LPCWSTR>(pInputData));
 			g_pPortList->AddMfmPort(pXCVDATA->pPort);
 			g_pLog->Debug(L"MfmXcvDataPort returning ERROR_SUCCESS");
 			return ERROR_SUCCESS;
@@ -309,7 +309,7 @@ DWORD WINAPI MfmXcvDataPort(HANDLE hXcv, LPCWSTR pszDataName, PBYTE pInputData,
 	}
 	else if (wcscmp(pszDataName, L"PortExists") == 0)
 	{
-		LPWSTR szPortName = (LPWSTR)pInputData;
+		LPCWSTR szPortName = reinterpret_cast<LPCWSTR>(pInputData);
 		DWORD needed, returned;
 		if (EnumPorts(NULL, 1, NULL, 0, &needed, &returned) == 0 &&
 			GetLastError() == ERROR_INSUFFICIENT_BUFFER)
@@ -322,13 +322,13 @@ DWORD WINAPI MfmXcvDataPort(HANDLE hXcv, LPCWSTR pszDataName, PBYTE pInputData,
 			}
 			if (EnumPorts(NULL, 1, pBuf, needed, &needed, &returned))
 			{
-				PORT_INFO_1W* pPorts = (PORT_INFO_1W*)pBuf;
+				PORT_INFO_1W* pPorts = reinterpret_cast<PORT_INFO_1W*>(pBuf);
 				while (returned--)
 				{
 					if (_wcsicmp(szPortName, pPorts->pName) == 0)
 					{
 						g_pLog->Debug(L"MfmXcvDataPort: port already exists (%s)", szPortName);
-						*((BOOL*)pOutputData) = TRUE;
+						*(reinterpret_cast<BOOL*>(pOutputData)) = TRUE;
 						break;
 					}
 					pPorts++;
@@ -354,7 +354,7 @@ DWORD WINAPI MfmXcvDataPort(HANDLE hXcv, LPCWSTR pszDataName, PBYTE pInputData,
 					pXCVDATA->GrantedAccess);
 				return ERROR_ACCESS_DENIED;
 			}
-			LPPORTCONFIG ppc = (LPPORTCONFIG)pInputData;
+			LPPORTCONFIG ppc = reinterpret_cast<LPPORTCONFIG>(pInputData);
 			pXCVDATA->pPort->SetConfig(ppc);
 			g_pPortList->SaveToRegistry();
 			g_pLog->Debug(L"MfmXcvDataPort returning ERROR_SUCCESS");
@@ -374,7 +374,7 @@ DWORD WINAPI MfmXcvDataPort(HANDLE hXcv, LPCWSTR pszDataName, PBYTE pInputData,
 		}
 		if (pXCVDATA != NULL && pXCVDATA->pPort != NULL && pOutputData != NULL)
 		{
-			LPPORTCONFIG ppc = (LPPORTCONFIG)pOutputData;
+			LPPORTCONFIG ppc = reinterpret_cast<LPPORTCONFIG>(pOutputData);
 			wcscpy_s(ppc->szPortName, LENGTHOF(ppc->szPortName), pXCVDATA->pPort->PortName());
 			wcscpy_s(ppc->szOutputPath, LENGTHOF(ppc->szOutputPath), pXCVDATA->pPort->OutputPath());
 			wcscpy_s(ppc->szFilePattern, LENGTHOF(ppc->szFilePattern), pXCVDATA->pPort->FilePattern());
@@ -417,7 +417,7 @@ DWORD WINAPI MfmXcvDataPort(HANDLE hXcv, LPCWSTR pszDataName, PBYTE pInputData,
 //-------------------------------------------------------------------------------------
 BOOL WINAPI MfmXcvClosePort(HANDLE hXcv)
 {
-	LPXCVDATA pXCVDATA = (LPXCVDATA)hXcv;
+	LPXCVDATA pXCVDATA = static_cast<LPXCVDATA>(hXcv);
 
 	g_pLog->Debug(L"MfmXcvClosePort called");
 
@@ -451,17 +451,15 @@ VOID WINAPI MfmShutdown(HANDLE hMonitor)
 //-------------------------------------------------------------------------------------
 LPMONITOR2 WINAPI InitializePrintMonitor2(_In_ PMONITORINIT pMonitorInit, _Out_ PHANDLE phMonitor)
 {
-	phMonitor = NULL;
+	static MONITOR2 themon = { 0 };
 
-	static MONITOR2 themon;
+	phMonitor = NULL;
 
 	if (!pMonitorInit->bLocal)
 	{
 		g_pLog->Critical(L"InitializePrintMonitor2: can't work on clusters");
 		return NULL;
 	}
-
-	ZeroMemory(&themon, sizeof(MONITOR2));
 
 	if (IsWindowsXPOrGreater())
 	{

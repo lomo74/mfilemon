@@ -44,16 +44,23 @@ CMfmLog::CMfmLog()
 
 	InitializeCriticalSection(&m_CSLog);
 
-	ResumeThread(m_hThread);
+	if (m_hThread)
+		ResumeThread(m_hThread);
 }
 //---------------------------------------------------------------------------
 
 CMfmLog::~CMfmLog()
 {
 	SetEvent(m_hStop);
-	if (WaitForSingleObject(m_hThread, 10000) != WAIT_OBJECT_0)
-		TerminateThread(m_hThread, 255);
-	CloseHandle(m_hThread);
+
+	if (m_hThread)
+	{
+		if (WaitForSingleObject(m_hThread, 10000) != WAIT_OBJECT_0)
+			TerminateThread(m_hThread, 255);
+
+		CloseHandle(m_hThread);
+	}
+
 	CloseHandle(m_hStop);
 
 	if (m_hLogFile != INVALID_HANDLE_VALUE)
@@ -342,22 +349,27 @@ void CMfmLog::Critical(CPort* pPort, LPCWSTR szFormat, ...)
 
 void CMfmLog::LogArgs(CPort* pPort, LPCWSTR szFormat, LPCWSTR szType, va_list args)
 {
-	WCHAR szBuf1[MAXLOGLINE];
-	WCHAR szBuf2[MAXLOGLINE];
+	WCHAR* szBuf1 = new WCHAR[MAXLOGLINE];
+	WCHAR* szBuf2 = new WCHAR[MAXLOGLINE];
 
-	vswprintf_s(szBuf1, LENGTHOF(szBuf1), szFormat, args);
-	swprintf_s(szBuf2, LENGTHOF(szBuf2), L"%s: %s", pPort->PortName(), szBuf1);
+	vswprintf_s(szBuf1, MAXLOGLINE, szFormat, args);
+	swprintf_s(szBuf2, MAXLOGLINE, L"%s: %s", pPort->PortName(), szBuf1);
 
 	Log(szType, szBuf2);
+
+	delete[] szBuf1;
+	delete[] szBuf2;
 }
 //---------------------------------------------------------------------------
 
 void CMfmLog::LogArgs(LPCWSTR szFormat, LPCWSTR szType, va_list args)
 {
-	WCHAR szMessage[MAXLOGLINE];
+	WCHAR* szMessage = new WCHAR[MAXLOGLINE];
 
-	vswprintf_s(szMessage, LENGTHOF(szMessage), szFormat, args);
+	vswprintf_s(szMessage, MAXLOGLINE, szFormat, args);
 	Log(szType, szMessage);
+
+	delete[] szMessage;
 }
 //---------------------------------------------------------------------------
 

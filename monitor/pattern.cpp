@@ -39,7 +39,7 @@ CPattern::CPattern(LPCWSTR szPattern, CPort* pPort, BOOL bUserCommand)
 	wcscpy_s(m_szPattern, LENGTHOF(m_szPattern), szPattern);
 
 	//buffers for search fields
-	WCHAR szBuf[3][MAX_PATH + 1];
+	WCHAR szBuf[3][MAX_PATH + 1] = { 0 };
 	WCHAR* pBuf[3] = {
 		szBuf[0],
 		szBuf[1],
@@ -114,7 +114,7 @@ CPattern::CPattern(LPCWSTR szPattern, CPort* pPort, BOOL bUserCommand)
 							: (nWidth == 0)
 								? 3
 								: (nWidth < 0)
-									? 1 - nWidth
+									? - nWidth - 1
 									: nWidth - 1;
 						while (*szPattern >= L'0' && *szPattern <= L'9')
 						{

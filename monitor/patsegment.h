@@ -70,7 +70,9 @@ class CDatePartSegment : public CPatternSegment
 protected:
 	CDatePartSegment(int nWidth)
 		: CPatternSegment(nWidth)
-	{ }
+	{
+		ZeroMemory(&m_SystemTime, sizeof(m_SystemTime));
+	}
 
 public:
 	virtual LPCWSTR Value();

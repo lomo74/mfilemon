@@ -33,9 +33,8 @@ static BOOL bPasswordChanged = FALSE;
 //check on the "pattern"
 //static LPWSTR szInvalidCharacters = L"/:*?\"<>|";
 
-static LPWSTR szHelpText =
 #if (!defined(MFILEMONLANG) || MFILEMONLANG == 0x0409)
-L"\
+static LPCWSTR szHelpText = L"\
 Field format: %[width][.start]type\n\
   width = 0..9 ('i' fields) or 0..99 (other fields).\n\
     Default is 4 for 'i' and 0 for others.\n\
@@ -57,7 +56,7 @@ Field format: %[width][.start]type\n\
     n:  minutes\n\
     s:  seconds\n\
     t:  print job title\n\
-	T:  temp directory path\n\
+    T:  temp directory path\n\
     j:  print job id\n\
     u:  user name (who started print job)\n\
     c:  computer name (from which came print job)\n\
@@ -77,12 +76,12 @@ file%i-page|%d|*|.jpg -> will examine any file in the form file%i-page*.jpg\n\
                          and then use the name file%i-page%d.jpg. Note that\n\
                          %i will be substituted with the first available integer,\n\
                          while %d will be used literally.";
-static LPWSTR szLogLevelNone = L"None";
-static LPWSTR szLogLevelErrors = L"Errors";
-static LPWSTR szLogLevelWarnings = L"Warnings";
-static LPWSTR szLogLevelAll = L"All";
+static LPCWSTR szLogLevelNone = L"None";
+static LPCWSTR szLogLevelErrors = L"Errors";
+static LPCWSTR szLogLevelWarnings = L"Warnings";
+static LPCWSTR szLogLevelDebug = L"Debug";
 #else if (MFILEMONLANG == 0x0410)
-L"\
+static LPCWSTR szHelpText = L"\
 Formato dei campi: %[width][.start]type\n\
   width = 0..9 (campi 'i') o 0..99 (altri campi).\n\
     Il default è 4 per 'i' e 0 per gli altri.\n\
@@ -104,7 +103,7 @@ Formato dei campi: %[width][.start]type\n\
     n:  minuti\n\
     s:  secondi\n\
     t:  titolo del job stampa\n\
-	T:  percorso directory temp\n\
+    T:  percorso directory temp\n\
     j:  id del job di stampa\n\
     u:  nome utente (che ha lanciato il job di stampa)\n\
     c:  nome computer (da cui è partito il job di stampa)\n\
@@ -123,10 +122,10 @@ file.%u.%6.0i.prn -> file.Administrator.000000.prn, file.Administrator.000001.pr
 file%i-page|%d|*|.jpg -> esaminerà i file nella forma file%i-page*.jpg, per poi usare\n\
                          il nome file%i-page%d.jpg. NB %i verrà sostituito con il primo\n\
                          intero libero, mentre %d verrà usato letteralmente.";
-static LPWSTR szLogLevelNone = L"Nessuno";
-static LPWSTR szLogLevelErrors = L"Errori";
-static LPWSTR szLogLevelWarnings = L"Avvisi";
-static LPWSTR szLogLevelAll = L"Tutto";
+static LPCWSTR szLogLevelNone = L"Nessuno";
+static LPCWSTR szLogLevelErrors = L"Errori";
+static LPCWSTR szLogLevelWarnings = L"Avvisi";
+static LPCWSTR szLogLevelDebug = L"Debug";
 #endif
 
 //-------------------------------------------------------------------------------------
@@ -167,9 +166,11 @@ void DoBrowse(HWND hDlg, int nIDDlgItem)
 		WCHAR szPath[MAX_PATH + 1];
 		SHGetPathFromIDListW(pidl, szPath);
 		IMalloc* pMalloc;
-		SHGetMalloc(&pMalloc);
-		pMalloc->Free(pidl);
-		pMalloc->Release();
+		if (SUCCEEDED(SHGetMalloc(&pMalloc)))
+		{
+			pMalloc->Free(pidl);
+			pMalloc->Release();
+		}
 		SetDlgItemTextW(hDlg, nIDDlgItem, szPath);
 	}
 }
@@ -184,7 +185,7 @@ BOOL CALLBACK AddPortUIDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM l
 	case WM_INITDIALOG:
 		UpdateCaption(hDlg);
 
-		ppc = (LPPORTCONFIG)lParam;
+		ppc = reinterpret_cast<LPPORTCONFIG>(lParam);
 		//Nome porta
 		SetFocus(GetDlgItem(hDlg, ID_EDTPORTNAME));
 		return TRUE;
@@ -257,7 +258,7 @@ BOOL CALLBACK MonitorUIDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM l
 	case WM_INITDIALOG:
 		UpdateCaption(hDlg);
 
-		ppc = (LPPORTCONFIG)lParam;
+		ppc = reinterpret_cast<LPPORTCONFIG>(lParam);
 		//Nome porta
 		SetDlgItemTextW(hDlg, ID_EDTPORTNAME, ppc->szPortName);
 		//Output path
@@ -296,10 +297,10 @@ BOOL CALLBACK MonitorUIDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM l
 		hWnd = GetDlgItem(hDlg, ID_CBLOGLEVEL);
 		if (hWnd)
 		{
-			SendMessageW(hWnd, CB_ADDSTRING, 0, (LPARAM)szLogLevelNone);
-			SendMessageW(hWnd, CB_ADDSTRING, 0, (LPARAM)szLogLevelErrors);
-			SendMessageW(hWnd, CB_ADDSTRING, 0, (LPARAM)szLogLevelWarnings);
-			SendMessageW(hWnd, CB_ADDSTRING, 0, (LPARAM)szLogLevelAll);
+			SendMessageW(hWnd, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(szLogLevelNone));
+			SendMessageW(hWnd, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(szLogLevelErrors));
+			SendMessageW(hWnd, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(szLogLevelWarnings));
+			SendMessageW(hWnd, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(szLogLevelDebug));
 			SendMessageW(hWnd, CB_SETCURSEL, ppc->nLogLevel, 0);
 		}
 		SetDlgItemTextW(hDlg, ID_EDTUSER, ppc->szUser);
@@ -420,7 +421,7 @@ BOOL CALLBACK MonitorUIDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM l
 				//Log Level
 				hWnd = GetDlgItem(hDlg, ID_CBLOGLEVEL);
 				if (hWnd)
-					ppc->nLogLevel = (int)SendMessageW(hWnd, CB_GETCURSEL, 0, 0);
+					ppc->nLogLevel = static_cast<int>(SendMessageW(hWnd, CB_GETCURSEL, 0, 0));
 				TrimControlText(hDlg, ID_EDTUSER, ppc->szUser, LENGTHOF(ppc->szUser));
 				TrimControlText(hDlg, ID_EDTDOMAIN, ppc->szDomain, LENGTHOF(ppc->szDomain));
 				if (bPasswordChanged)
@@ -499,16 +500,15 @@ BOOL WINAPI MfmAddPortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszMonitorNameIn,
 	}
 
 	size_t len = 12 + wcslen(pszMonitorNameIn) + 1;
-	HANDLE hHeap = GetProcessHeap();
 	LPWSTR pszPrinter;
-	if ((pszPrinter = (LPWSTR)HeapAlloc(hHeap, 0, len * sizeof(WCHAR))) == NULL)
+	if ((pszPrinter = new WCHAR[len]) == NULL)
 	{
 		SetLastError(ERROR_OUTOFMEMORY);
 		return FALSE;
 	}
 	swprintf_s(pszPrinter, len, L",XcvMonitor %ls", pszMonitorNameIn);
 	CPrinterHandle printer(pszPrinter, SERVER_ACCESS_ADMINISTER);
-	HeapFree(hHeap, 0, pszPrinter);
+	delete[] pszPrinter;
 
 	if (!printer.Handle())
 	{
@@ -517,14 +517,14 @@ BOOL WINAPI MfmAddPortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszMonitorNameIn,
 	}
 
 	BOOL bRes = FALSE;
-	PORTCONFIG pc = {0};
+	PORTCONFIG pc = { 0 };
 	DWORD cbOutputNeeded, dwStatus;
 
 	for (;;)
 	{
 		//chiediamo il nome della porta
 		if (DialogBoxParamW(g_hInstance, MAKEINTRESOURCE(IDD_ADDPORTUI),
-			hWnd, (DLGPROC)AddPortUIDlgProc, (LPARAM)&pc) == IDCANCEL)
+			hWnd, reinterpret_cast<DLGPROC>(AddPortUIDlgProc), reinterpret_cast<LPARAM>(&pc)) == IDCANCEL)
 		{
 			SetLastError(ERROR_CANCELLED);
 			return FALSE;
@@ -533,8 +533,8 @@ BOOL WINAPI MfmAddPortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszMonitorNameIn,
 		BOOL bPortExists = FALSE;
 
 		//controlliamo se la porta esiste già
-		bRes = XcvDataW(printer, L"PortExists", (PBYTE)pc.szPortName, sizeof(pc.szPortName),
-			(PBYTE)&bPortExists, sizeof(bPortExists), &cbOutputNeeded, &dwStatus);
+		bRes = XcvDataW(printer, L"PortExists", reinterpret_cast<PBYTE>(pc.szPortName), sizeof(pc.szPortName),
+			reinterpret_cast<PBYTE>(&bPortExists), sizeof(bPortExists), &cbOutputNeeded, &dwStatus);
 		if (!bRes || dwStatus != ERROR_SUCCESS)
 		{
 			SetLastError(dwStatus);
@@ -548,7 +548,7 @@ BOOL WINAPI MfmAddPortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszMonitorNameIn,
 	}
 
 	//Ok, non esiste: creiamola
-	bRes = XcvDataW(printer, L"AddPort", (PBYTE)pc.szPortName, sizeof(pc.szPortName),
+	bRes = XcvDataW(printer, L"AddPort", reinterpret_cast<PBYTE>(pc.szPortName), sizeof(pc.szPortName),
 		NULL, 0, &cbOutputNeeded, &dwStatus);
 	if (!bRes || dwStatus != ERROR_SUCCESS)
 	{
@@ -558,7 +558,7 @@ BOOL WINAPI MfmAddPortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszMonitorNameIn,
 
 	//chiediamo la configurazione al nostro utente
 	if (DialogBoxParamW(g_hInstance, MAKEINTRESOURCE(IDD_MONITORUI),
-		hWnd, (DLGPROC)MonitorUIDlgProc, (LPARAM)&pc) == IDCANCEL)
+		hWnd, reinterpret_cast<DLGPROC>(MonitorUIDlgProc), reinterpret_cast<LPARAM>(&pc)) == IDCANCEL)
 	{
 		SetLastError(ERROR_CANCELLED);
 		return FALSE;
@@ -576,7 +576,7 @@ BOOL WINAPI MfmAddPortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszMonitorNameIn,
 	if (ppszPortNameOut)
 	{
 		size_t len1 = (wcslen(pc.szPortName) + 1) * sizeof(WCHAR);
-		*ppszPortNameOut = (PWSTR)GlobalAlloc(GMEM_FIXED | GMEM_ZEROINIT, len1);
+		*ppszPortNameOut = static_cast<PWSTR>(GlobalAlloc(GMEM_FIXED | GMEM_ZEROINIT, len1));
 		if (*ppszPortNameOut)
 			CopyMemory(*ppszPortNameOut, pc.szPortName, len1);
 	}
@@ -602,16 +602,15 @@ BOOL WINAPI MfmConfigurePortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszPortName)
 	}
 
 	size_t len = 9 + wcslen(pszPortName) + 1;
-	HANDLE hHeap = GetProcessHeap();
 	LPWSTR pszPrinter;
-	if ((pszPrinter = (LPWSTR)HeapAlloc(hHeap, 0, len * sizeof(WCHAR))) == NULL)
+	if ((pszPrinter = new WCHAR[len]) == NULL)
 	{
 		SetLastError(ERROR_OUTOFMEMORY);
 		return FALSE;
 	}
 	swprintf_s(pszPrinter, len, L",XcvPort %ls", pszPortName);
 	CPrinterHandle printer(pszPrinter, SERVER_ACCESS_ADMINISTER);
-	HeapFree(hHeap, 0, pszPrinter);
+	delete[] pszPrinter;
 
 	if (!printer.Handle())
 	{
@@ -624,7 +623,7 @@ BOOL WINAPI MfmConfigurePortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszPortName)
 	DWORD cbOutputNeeded, dwStatus;
 
 	bRes = XcvDataW(printer, L"GetConfig", NULL, 0,
-		(PBYTE)&pc, sizeof(pc), &cbOutputNeeded, &dwStatus);
+		reinterpret_cast<PBYTE>(&pc), sizeof(pc), &cbOutputNeeded, &dwStatus);
 	if (!bRes || dwStatus != ERROR_SUCCESS)
 	{
 		SetLastError(dwStatus);
@@ -633,7 +632,7 @@ BOOL WINAPI MfmConfigurePortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszPortName)
 
 	//chiediamo la configurazione al nostro utente
 	if (DialogBoxParamW(g_hInstance, MAKEINTRESOURCE(IDD_MONITORUI),
-		hWnd, (DLGPROC)MonitorUIDlgProc, (LPARAM)&pc) == IDCANCEL)
+		hWnd, reinterpret_cast<DLGPROC>(MonitorUIDlgProc), reinterpret_cast<LPARAM>(&pc)) == IDCANCEL)
 	{
 		SetLastError(ERROR_CANCELLED);
 		return FALSE;
@@ -669,16 +668,15 @@ BOOL WINAPI MfmDeletePortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszPortName)
 	}
 
 	size_t len = 9 + wcslen(pszPortName) + 1;
-	HANDLE hHeap = GetProcessHeap();
 	LPWSTR pszPrinter;
-	if ((pszPrinter = (LPWSTR)HeapAlloc(hHeap, 0, len * sizeof(WCHAR))) == NULL)
+	if ((pszPrinter = new WCHAR[len]) == NULL)
 	{
 		SetLastError(ERROR_OUTOFMEMORY);
 		return FALSE;
 	}
 	swprintf_s(pszPrinter, len, L",XcvPort %ls", pszPortName);
 	CPrinterHandle printer(pszPrinter, SERVER_ACCESS_ADMINISTER);
-	HeapFree(hHeap, 0, pszPrinter);
+	delete[] pszPrinter;
 
 	if (!printer.Handle())
 	{
@@ -689,8 +687,18 @@ BOOL WINAPI MfmDeletePortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszPortName)
 	BOOL bRes = FALSE;
 	DWORD cbOutputNeeded, dwStatus;
 
-	bRes = XcvDataW(printer, L"DeletePort", (PBYTE)pszPortName,
-		(wcslen(pszPortName) + 1) * sizeof(WCHAR), NULL, 0, &cbOutputNeeded, &dwStatus);
+	LPWSTR strName = _wcsdup(pszPortName);
+	bRes = XcvDataW(
+		printer,
+		L"DeletePort",
+		reinterpret_cast<PBYTE>(strName),
+		static_cast<DWORD>((wcslen(strName) + 1) * sizeof(WCHAR)),
+		NULL,
+		0,
+		&cbOutputNeeded,
+		&dwStatus
+	);
+	free(strName);
 	if (!bRes || dwStatus != ERROR_SUCCESS)
 	{
 		SetLastError(dwStatus);
@@ -736,7 +744,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
 			g_hInstance = hinstDLL;
 // see here http://msdn.microsoft.com/en-us/library/ms682659%28v=vs.85%29.aspx
 // why the following call should not be done
-//			DisableThreadLibraryCalls((HMODULE)hinstDLL);
+//			DisableThreadLibraryCalls(hinstDLL);
 			break;
 		}
 	case DLL_PROCESS_DETACH:

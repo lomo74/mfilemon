@@ -195,7 +195,8 @@ IMPLEMENT_DATEPART_SEGMENT(CSecondSegment, 2, m_SystemTime.wSecond)
 LPCWSTR CDayNameSegment::GetDatePart()
 {
 	swprintf_s(m_szBuffer, LENGTHOF(m_szBuffer), L"%*s", m_nWidth, m_szDayNames[m_SystemTime.wDayOfWeek]);
-	if (m_nWidth > 0 && m_nWidth < (int)wcslen(m_szBuffer))
+	int len = static_cast<int>(wcslen(m_szBuffer));
+	if (m_nWidth > 0 && m_nWidth < len)
 		m_szBuffer[m_nWidth] = L'\0';
 	return m_szBuffer;
 }
@@ -204,7 +205,8 @@ LPCWSTR CDayNameSegment::GetDatePart()
 LPCWSTR CMonthNameSegment::GetDatePart()
 {
 	swprintf_s(m_szBuffer, LENGTHOF(m_szBuffer), L"%*s", m_nWidth, m_szMonthNames[m_SystemTime.wMonth - 1]);
-	if (m_nWidth > 0 && m_nWidth < (int)wcslen(m_szBuffer))
+	int len = static_cast<int>(wcslen(m_szBuffer));
+	if (m_nWidth > 0 && m_nWidth < len)
 		m_szBuffer[m_nWidth] = L'\0';
 	return m_szBuffer;
 }

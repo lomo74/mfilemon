@@ -27,41 +27,41 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //-------------------------------------------------------------------------------------
 static BOOL EnablePrivilege(
-    HANDLE hToken,                      // access token handle
-    LPCWSTR lpszPrivilege,              // name of privilege to enable/disable
-    BOOL bEnablePrivilege,              // to enable or disable privilege
+	HANDLE hToken,                      // access token handle
+	LPCWSTR lpszPrivilege,              // name of privilege to enable/disable
+	BOOL bEnablePrivilege,              // to enable or disable privilege
 	PTOKEN_PRIVILEGES PreviousState		// previous state
-    ) 
+)
 {
 	TOKEN_PRIVILEGES tp = { 0 };
-    LUID luid;
+	LUID luid;
 
-    if (!LookupPrivilegeValueW(NULL, lpszPrivilege, &luid))
-    {
-        return FALSE; 
-    }
+	if (!LookupPrivilegeValueW(NULL, lpszPrivilege, &luid))
+	{
+		return FALSE; 
+	}
 
-    tp.PrivilegeCount = 1;
-    tp.Privileges[0].Luid = luid;
-    if (bEnablePrivilege)
-        tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-    else
-        tp.Privileges[0].Attributes = 0;
+	tp.PrivilegeCount = 1;
+	tp.Privileges[0].Luid = luid;
+	if (bEnablePrivilege)
+		tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	else
+		tp.Privileges[0].Attributes = 0;
 
 	DWORD Size = sizeof(TOKEN_PRIVILEGES);
-    // Enable the privilege or disable all privileges.
-    if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES),
+	// Enable the privilege or disable all privileges.
+	if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES),
 		PreviousState, &Size))
-    { 
-          return FALSE; 
-    } 
+	{ 
+		return FALSE; 
+	} 
 
-    if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
-    {
-          return FALSE;
-    } 
+	if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
+	{
+		return FALSE;
+	} 
 
-    return TRUE;
+	return TRUE;
 }
 
 //-------------------------------------------------------------------------------------
@@ -410,10 +410,10 @@ BOOL CPort::StartJob(DWORD nJobId, LPWSTR szJobTitle, LPWSTR szPrinterName)
 			delete[] m_pJobInfo2;
 
 		m_cbJobInfo2 = cbNeeded;
-		m_pJobInfo2 = (JOB_INFO_2W*)new BYTE[cbNeeded];
+		m_pJobInfo2 = reinterpret_cast<JOB_INFO_2W*>(new BYTE[cbNeeded]);
 	}
 
-	if (!GetJobW(printer, nJobId, 2, (LPBYTE)m_pJobInfo2, m_cbJobInfo2, &cbNeeded))
+	if (!GetJobW(printer, nJobId, 2, reinterpret_cast<LPBYTE>(m_pJobInfo2), m_cbJobInfo2, &cbNeeded))
 	{
 		g_pLog->Critical(this, L"CPort::StartJob: GetJobW failed (%i)", GetLastError());
 		return FALSE;
@@ -449,7 +449,7 @@ BOOL CPort::StartJob(DWORD nJobId, LPWSTR szJobTitle, LPWSTR szPrinterName)
 		if (m_szPrinterName)
 			delete[] m_szPrinterName;
 
-		m_cchPrinterName = (DWORD)len;
+		m_cchPrinterName = static_cast<DWORD>(len);
 		m_szPrinterName = new WCHAR[len];
 	}
 
@@ -590,23 +590,21 @@ DWORD CPort::CreateOutputFile()
 				goto cleanup;
 			}
 
-			STARTUPINFOW si;
-			ZeroMemory(&si, sizeof(si));
+			STARTUPINFOW si = { 0 };
 			si.cb = sizeof(si);
 			si.hStdInput = hStdinR;
 			si.hStdOutput = hStdoutW;
 			si.hStdError = hStdoutW;
 			if (m_bHideProcess)
+			{
 				si.wShowWindow = SW_HIDE;
+			}
 			else
 			{
 				si.wShowWindow = SW_SHOW;
-				si.lpDesktop = L"winsta0\\default";
+				si.lpDesktop = _wcsdup(L"winsta0\\default");
 			}
 			si.dwFlags |= STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-
-//			if (!BuildCommandLine())
-//				return ERROR_CAN_NOT_COMPLETE;
 
 			//create child process - give up in case of failure since we need to write to process
 			BOOL bRes;
@@ -618,6 +616,9 @@ DWORD CPort::CreateOutputFile()
 					TRUE, 0, NULL, (*m_szExecPath) ? m_szExecPath : NULL, &si, &m_procInfo);
 
 			DWORD dwErr = GetLastError();
+
+			if (si.lpDesktop)
+				free(si.lpDesktop);
 
 			//close stdout and stdin pipe after child process has inherited them
 			CloseHandle(hStdoutW);
@@ -646,7 +647,7 @@ DWORD CPort::CreateOutputFile()
 			//the external program, and finally close handle to our end of stdout
 			HANDLE hReadThread = NULL;
 			DWORD dwId = 0;
-			if ((hReadThread = CreateThread(NULL, 0, ReadThreadProc, (LPVOID)hStdoutR, 0, &dwId)) == NULL)
+			if ((hReadThread = CreateThread(NULL, 0, ReadThreadProc, static_cast<LPVOID>(hStdoutR), 0, &dwId)) == NULL)
 			{
 				g_pLog->Critical(this, L"CPort::CreateOutputFile: CreateThread failed (%i)", GetLastError());
 				dwRet = ERROR_CAN_NOT_COMPLETE;
@@ -741,7 +742,7 @@ BOOL CPort::WriteToFile(LPCVOID lpBuffer, DWORD cbBuffer, LPDWORD pcbWritten)
 //-------------------------------------------------------------------------------------
 DWORD WINAPI CPort::WriteThreadProc(LPVOID lpParam)
 {
-	LPTHREADDATA pData = (LPTHREADDATA)lpParam;
+	LPTHREADDATA pData = static_cast<LPTHREADDATA>(lpParam);
 
 	_ASSERTE(pData != NULL);
 	_ASSERTE(pData->pPort != NULL);
@@ -774,7 +775,7 @@ DWORD WINAPI CPort::WriteThreadProc(LPVOID lpParam)
 //-------------------------------------------------------------------------------------
 DWORD WINAPI CPort::ReadThreadProc(LPVOID lpParam)
 {
-	HANDLE hStdoutR = (HANDLE)lpParam;
+	HANDLE hStdoutR = static_cast<HANDLE>(lpParam);
 
 	_ASSERTE(hStdoutR != NULL);
 
@@ -819,10 +820,10 @@ BOOL CPort::EndJob()
 	//start user command
 	if (!m_bPipeData && m_pUserCommand && *m_pUserCommand->PatternString())
 	{
-		STARTUPINFOW si;
+		STARTUPINFOW si = { 0 };
 
 		ZeroMemory(&m_procInfo, sizeof(m_procInfo));
-		ZeroMemory(&si, sizeof(si));
+
 		si.cb = sizeof(si);
 
 		//we're not going to give up in case of failure
@@ -889,7 +890,7 @@ LPCWSTR CPort::UserName() const
 {
 	return m_pJobInfo2
 		? m_pJobInfo2->pUserName
-		: (LPWSTR)L"";
+		: L"";
 }
 
 //-------------------------------------------------------------------------------------
@@ -910,15 +911,15 @@ LPCWSTR CPort::ComputerName() const
 }
 
 //-------------------------------------------------------------------------------------
-LPWSTR CPort::JobTitle() const
+LPCWSTR CPort::JobTitle() const
 {
 	return m_pJobInfo2
 		? m_pJobInfo2->pDocument
-		: (LPWSTR)L"";
+		: L"";
 }
 
 //-------------------------------------------------------------------------------------
-LPWSTR CPort::Bin() const
+LPCWSTR CPort::Bin() const
 {
 	static WCHAR szBinName[16];
 
