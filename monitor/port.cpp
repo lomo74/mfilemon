@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Monti Lorenzo
+Copyright (C) 2007-2021 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -886,14 +886,6 @@ void CPort::SetConfig(LPPORTCONFIG pConfig)
 }
 
 //-------------------------------------------------------------------------------------
-LPCWSTR CPort::UserName() const
-{
-	return m_pJobInfo2
-		? m_pJobInfo2->pUserName
-		: L"";
-}
-
-//-------------------------------------------------------------------------------------
 LPCWSTR CPort::ComputerName() const
 {
 	if (m_pJobInfo2)
@@ -908,14 +900,6 @@ LPCWSTR CPort::ComputerName() const
 	}
 	else
 		return L"";
-}
-
-//-------------------------------------------------------------------------------------
-LPCWSTR CPort::JobTitle() const
-{
-	return m_pJobInfo2
-		? m_pJobInfo2->pDocument
-		: L"";
 }
 
 //-------------------------------------------------------------------------------------

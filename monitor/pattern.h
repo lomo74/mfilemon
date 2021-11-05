@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Monti Lorenzo
+Copyright (C) 2007-2021 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -44,18 +44,6 @@ public:
 	BOOL NextValue();
 	LPWSTR Value();
 	LPWSTR SearchValue();
-//2009-05-24 all of job's properties are stored in the CPort's m_pJobInfo structure
-//	void SetJobId(DWORD nJobId) { m_nJobId = nJobId; }
-//	void SetJobTitle(LPCWSTR szJobTitle);
-//	DWORD JobId() const { return m_nJobId; }
-/*
-	LPWSTR JobTitle() const
-	{
-		return m_szJobTitle
-			? m_szJobTitle
-			: L"";
-	}
-*/
 	LPWSTR PatternString() { return m_szPattern; }
 	void Reset();
 	static LPCWSTR szDefaultFilePattern;

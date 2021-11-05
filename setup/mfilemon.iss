@@ -1,5 +1,5 @@
 ; MFILEMON - print to file with automatic filename assignment
-; Copyright (C) 2007-2021 Monti Lorenzo
+; Copyright (C) 2007-2021 Lorenzo Monti
 ;
 ; This program is free software; you can redistribute it and/or
 ; modify it under the terms of the GNU General Public License
@@ -26,13 +26,13 @@ AppId={{A932243F-381F-434C-B18E-4F09D2F015F8}
 AppName={#AppName}
 AppVersion={#AppVerStr}
 AppVerName={#AppName} {#AppVerStr}
-AppPublisher=Monti Lorenzo
+AppPublisher=Lorenzo Monti
 AppPublisherURL=http://mfilemon.sourceforge.net/
 AppSupportURL=http://mfilemon.sourceforge.net/
 AppUpdatesURL=http://mfilemon.sourceforge.net/
 UninstallDisplayName={#AppName} {#AppVerStr}
-VersionInfoCompany=Monti Lorenzo
-VersionInfoCopyright=Copyright © 2007-2021 Monti Lorenzo
+VersionInfoCompany=Lorenzo Monti
+VersionInfoCopyright=Copyright © 2007-2021 Lorenzo Monti
 VersionInfoDescription={#AppName} setup program
 VersionInfoProductName={#AppName}
 VersionInfoVersion={#FileVerStr}

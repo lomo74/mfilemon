@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Monti Lorenzo
+Copyright (C) 2007-2021 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -61,8 +61,8 @@ public:
 	BOOL HideProcess() const { return m_bHideProcess; }
 	LPWSTR PrinterName() const { return m_szPrinterName; }
 	DWORD JobId() const { return m_nJobId; }
-	LPCWSTR JobTitle() const;
-	LPCWSTR UserName() const;
+	LPCWSTR JobTitle() const { return m_pJobInfo2 ? m_pJobInfo2->pDocument : (LPWSTR)L""; }
+	LPCWSTR UserName() const { return m_pJobInfo2 ? m_pJobInfo2->pUserName : (LPWSTR)L""; }
 	LPCWSTR ComputerName() const;
 	LPCWSTR FileName() const { return m_szFileName; }
 	LPCWSTR Path() const { return m_szParent; }

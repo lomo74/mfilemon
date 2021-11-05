@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Monti Lorenzo
+Copyright (C) 2007-2021 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -24,11 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class CAutoCriticalSection
 {
 public:
-	CAutoCriticalSection(CRITICAL_SECTION* pCritSect);
+	CAutoCriticalSection(LPCRITICAL_SECTION pCritSect);
 	virtual ~CAutoCriticalSection();
 
 private:
-	CRITICAL_SECTION* m_pCritSect;
+	LPCRITICAL_SECTION m_pCritSect;
 };
 
 class CPrinterHandle
@@ -39,6 +39,7 @@ public:
 	virtual ~CPrinterHandle();
 	operator HANDLE() const { return m_hHandle; }
 	HANDLE Handle() const { return m_hHandle; }
+
 private:
 	HANDLE m_hHandle;
 };

@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Monti Lorenzo
+Copyright (C) 2007-2021 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -168,7 +168,7 @@ LPBYTE CPortList::CopyPortToBuffer(CPort* pPort, DWORD dwLevel, LPBYTE pStart, L
 }
 
 //-------------------------------------------------------------------------------------
-BOOL CPortList::EnumMultiFilePorts(HANDLE hMonitor, LPCWSTR pName, DWORD Level, LPBYTE pPorts,
+BOOL CPortList::EnumPorts(HANDLE hMonitor, LPCWSTR pName, DWORD Level, LPBYTE pPorts,
 	DWORD cbBuf, LPDWORD pcbNeeded, LPDWORD pcReturned)
 {
 	UNREFERENCED_PARAMETER(pName);
@@ -242,7 +242,7 @@ void CPortList::AddMfmPort(CPort* pNewPort)
 	pPortRec->m_pNext = m_pFirstPortRec;
 	m_pFirstPortRec = pPortRec;
 
-	g_pLog->Info(L"port %s up and running", pNewPort->PortName());
+	g_pLog->Info(L"CPortList::AddMfmPort: port %s up and running", pNewPort->PortName());
 }
 
 //-------------------------------------------------------------------------------------
@@ -498,7 +498,7 @@ void CPortList::SaveToRegistry()
 	HANDLE hToken = NULL;
 	if (IsUACEnabled())
 	{
-		g_pLog->Debug(L"running on UAC enabled OS, reverting to local system");
+		g_pLog->Debug(L"CPortList::SaveToRegistry: running on UAC enabled OS, switching to local system");
 		OpenThreadToken(GetCurrentThread(), TOKEN_IMPERSONATE, TRUE, &hToken);
 		RevertToSelf();
 	}
@@ -621,7 +621,7 @@ void CPortList::SaveToRegistry()
 		if (!SetThreadToken(NULL, hToken))
 			g_pLog->Error(L"CPortList::SaveToRegistry: SetThreadToken failed (%i)", GetLastError());
 		CloseHandle(hToken);
-		g_pLog->Debug(L"back to unprivileged user");
+		g_pLog->Debug(L"CPortList::SaveToRegistry: back to unprivileged user");
 	}
 }
 

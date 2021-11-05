@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Monti Lorenzo
+Copyright (C) 2007-2021 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -23,7 +23,7 @@ static const LPWSTR pMonitorName = L"Multi File Port Monitor";
 
 static LPTSTR szGPL =
 	_T("MFILEMON - print to file with automatic filename assignment\n")
-	_T("Copyright (C) 2007-2021 Monti Lorenzo\n")
+	_T("Copyright (C) 2007-2021 Lorenzo Monti\n")
 	_T("\n")
 	_T("This program is free software; you can redistribute it and/or\n")
 	_T("modify it under the terms of the GNU General Public License\n")
@@ -60,7 +60,12 @@ static BOOL ListRegisteredMonitors()
 	}
 
 	LPBYTE pPorts = new BYTE[pcbNeeded];
-	ZeroMemory(pPorts, sizeof(BYTE) * pcbNeeded);
+
+	if (!pPorts)
+		return FALSE;
+	
+	ZeroMemory(pPorts, pcbNeeded);
+
 	BOOL result = EnumMonitors(NULL, 2, pPorts, pcbNeeded, &pcbNeeded, &pcReturned);
 	if (!result)
 	{
@@ -119,13 +124,13 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (ret == FALSE)
 	{
 		DWORD dwErr = GetLastError();
-		LPVOID pMsgBuf = NULL;
+		LPTSTR pMsgBuf = NULL;
 		if (FormatMessage(
 			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL, dwErr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&pMsgBuf, 0, NULL))
+			NULL, dwErr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), reinterpret_cast<LPTSTR>(&pMsgBuf), 0, NULL))
 		{
 			_tprintf(_T("The following error occurred:\n0x%08x\n%s\n"),
-				dwErr, static_cast<LPCTSTR>(pMsgBuf));
+				dwErr, pMsgBuf);
 			LocalFree(pMsgBuf);
 		}
 	}

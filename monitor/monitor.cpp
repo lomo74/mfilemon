@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Monti Lorenzo
+Copyright (C) 2007-2021 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -46,7 +46,7 @@ typedef struct tagXCVDATA
 BOOL WINAPI MfmEnumPorts(HANDLE hMonitor, LPWSTR pName, DWORD Level, LPBYTE pPorts, 
 						 DWORD cbBuf, LPDWORD pcbNeeded, LPDWORD pcReturned)
 {
-	return g_pPortList->EnumMultiFilePorts(hMonitor, pName, Level, pPorts,
+	return g_pPortList->EnumPorts(hMonitor, pName, Level, pPorts,
 		cbBuf, pcbNeeded, pcReturned);
 }
 
@@ -513,7 +513,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
 //		DisableThreadLibraryCalls(hinstDLL);
 		g_pLog = new CMfmLog();
 		g_pLog->Always(L"*** MFILEMON log start ***");
-		g_pPortList = new CPortList(szMonitorName, szDescription);
 #ifdef _DEBUG
 		//Force max log level in debug mode
 		g_pLog->SetLogLevel(LOGLEVEL_DEBUG);
@@ -521,6 +520,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
 		//Show only errors by default. We'll load the desired log level from the registry
 		g_pLog->SetLogLevel(LOGLEVEL_ERRORS);
 #endif
+		g_pPortList = new CPortList(szMonitorName, szDescription);
 		break;
 
 	case DLL_PROCESS_DETACH:

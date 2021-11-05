@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Monti Lorenzo
+Copyright (C) 2007-2021 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -129,7 +129,7 @@ static LPCWSTR szLogLevelDebug = L"Debug";
 #endif
 
 //-------------------------------------------------------------------------------------
-void UpdateCaption(HWND hDlg)
+static void UpdateCaption(HWND hDlg)
 {
 	WCHAR szCaption[256];
 	WCHAR szOldCaption[256];
@@ -247,7 +247,7 @@ BOOL CheckPattern(LPCWSTR szPattern)
 }
 
 //-------------------------------------------------------------------------------------
-BOOL CALLBACK MonitorUIDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM lParam)
+static BOOL CALLBACK MonitorUIDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM lParam)
 {
 	HWND hWnd, hControl;
 	WCHAR buf[16];
@@ -619,7 +619,7 @@ BOOL WINAPI MfmConfigurePortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszPortName)
 	}
 
 	BOOL bRes = FALSE;
-	PORTCONFIG pc = {0};
+	PORTCONFIG pc = { 0 };
 	DWORD cbOutputNeeded, dwStatus;
 
 	bRes = XcvDataW(printer, L"GetConfig", NULL, 0,
@@ -699,6 +699,7 @@ BOOL WINAPI MfmDeletePortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszPortName)
 		&dwStatus
 	);
 	free(strName);
+
 	if (!bRes || dwStatus != ERROR_SUCCESS)
 	{
 		SetLastError(dwStatus);

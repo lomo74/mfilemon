@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Monti Lorenzo
+Copyright (C) 2007-2021 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -69,7 +69,7 @@ public:
 	void AddMfmPort(CPort* pNewPort);
 	void DeletePort(CPort* pPortToDelete);
 	CPort* FindPort(LPCWSTR szPortName);
-	BOOL EnumMultiFilePorts(HANDLE hMonitor, LPCWSTR pName, DWORD Level, LPBYTE pPorts,
+	BOOL EnumPorts(HANDLE hMonitor, LPCWSTR pName, DWORD Level, LPBYTE pPorts,
 		DWORD cbBuf, LPDWORD pcbNeeded, LPDWORD pcReturned);
 	void LoadFromRegistry();
 	void SaveToRegistry();

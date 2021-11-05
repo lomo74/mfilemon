@@ -3,3 +3,4 @@ x64/
 x86_gcc/
 x64_gcc/
 *.vcxproj.user
+*.aps
