@@ -33,7 +33,7 @@ $(OBJDIR)\$(TARGET)\portlist.o \
 $(OBJDIR)\$(TARGET)\sec_api.o \
 $(OBJDIR)\$(TARGET)\stdafx.o
 
-DLL = $(OUTDIR)\$(TARGET)\mfilemon.dll
+DLL = $(OUTDIR)\$(TARGET)\amfilemon.dll
 LIBS = -lstdc++ -lwinspool
 ifeq ($(TARGET), release)
   FLAGS = -c -O2 -fomit-frame-pointer -municode -mdll -mwin32

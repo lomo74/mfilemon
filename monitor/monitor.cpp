@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Lorenzo Monti
+Copyright (C) 2007-2023 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -398,7 +398,7 @@ DWORD WINAPI MfmXcvDataPort(HANDLE hXcv, LPCWSTR pszDataName, PBYTE pInputData,
 	}
 	else if (wcscmp(pszDataName, L"MonitorUI") == 0)
 	{
-		static WCHAR szUIDLL[] = L"mfilemonui.dll";
+		static WCHAR szUIDLL[] = L"amfilemonui.dll";
 		*pcbOutputNeeded = sizeof(szUIDLL);
 		if (cbOutputData < sizeof(szUIDLL))
 		{

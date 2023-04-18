@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Lorenzo Monti
+Copyright (C) 2007-2023 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -100,7 +100,7 @@ BOOL CMfmLog::CreateLogFile()
 	WCHAR szPath[MAX_PATH + 1];
 
 	GetSystemDirectoryW(szPath, LENGTHOF(szPath));
-	wcscat_s(szPath, LENGTHOF(szPath), L"\\mfilemon.log");
+	wcscat_s(szPath, LENGTHOF(szPath), L"\\amfilemon.log");
 
 	m_hLogFile = CreateFileW(szPath, GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
@@ -143,11 +143,11 @@ void CMfmLog::RotateLogs()
 
 		if (n == 0)
 		{
-			wcscat_s(szOldPath, LENGTHOF(szOldPath), L"\\mfilemon.log");
+			wcscat_s(szOldPath, LENGTHOF(szOldPath), L"\\amfilemon.log");
 		}
 		else
 		{
-			swprintf_s(szOldFname, LENGTHOF(szOldFname), L"\\mfilemon.%i.log", n);
+			swprintf_s(szOldFname, LENGTHOF(szOldFname), L"\\amfilemon.%i.log", n);
 			wcscat_s(szOldPath, LENGTHOF(szOldPath), szOldFname);
 		}
 
@@ -159,7 +159,7 @@ void CMfmLog::RotateLogs()
 		{
 			GetSystemDirectoryW(szNewPath, LENGTHOF(szNewPath));
 
-			swprintf_s(szNewFname, LENGTHOF(szNewFname), L"\\mfilemon.%i.log", n + 1);
+			swprintf_s(szNewFname, LENGTHOF(szNewFname), L"\\amfilemon.%i.log", n + 1);
 			wcscat_s(szNewPath, LENGTHOF(szNewPath), szNewFname);
 
 			MoveFileW(szOldPath, szNewPath);

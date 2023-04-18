@@ -1,4 +1,4 @@
-LIBRARY mfilemonui
+LIBRARY amfilemonui
 
 EXPORTS
 	InitializePrintMonitorUI

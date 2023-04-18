@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Lorenzo Monti
+Copyright (C) 2007-2023 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -19,11 +19,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "stdafx.h"
 
-static const LPWSTR pMonitorName = L"Multi File Port Monitor";
+static const LPCWSTR pMonitorName = L"Auto Multi File Port Monitor";
 
 static LPTSTR szGPL =
 	_T("MFILEMON - print to file with automatic filename assignment\n")
-	_T("Copyright (C) 2007-2021 Lorenzo Monti\n")
+	_T("Copyright (C) 2007-2023 Lorenzo Monti\n")
 	_T("\n")
 	_T("This program is free software; you can redistribute it and/or\n")
 	_T("modify it under the terms of the GNU General Public License\n")
@@ -97,9 +97,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	LPTSTR szAction = NULL;
 	int ret;
 
-	minfo.pName = _T("Multi File Port Monitor");
+	minfo.pName = _tcsdup(pMonitorName);
 	minfo.pEnvironment = NULL;
-	minfo.pDLLName = _T("mfilemon.dll");
+	minfo.pDLLName = _tcsdup(_T("amfilemon.dll"));
 
 	if (argc > 1 && _tcsicmp(argv[1], _T("-r")) == 0)
 	{

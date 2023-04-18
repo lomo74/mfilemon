@@ -2,7 +2,7 @@
 ;
 ; Installation inf for printer port monitor
 ;
-; (c) Copyright 2007-2021 Lorenzo Monti
+; (c) Copyright 2007-2023 Lorenzo Monti
 ;
 
 [Version]
@@ -12,15 +12,15 @@ Class=Printer
 ClassGUID={4D36E979-E325-11CE-BFC1-08002BE10318}
 
 [PortMonitors]
-"Multi File Port Monitor"=mfilemon
+"Multi File Port Monitor"=amfilemon
 
-[mfilemon]
-CopyFiles=@mfilemon.dll, @mfilemonUI.dll
-PortMonitorDll=mfilemon.dll
+[amfilemon]
+CopyFiles=@amfilemon.dll, @amfilemonUI.dll
+PortMonitorDll=amfilemon.dll
 
 [SourceDisksFiles]
-mfilemon.dll=1,,
-mfilemonUI.dll=1,,
+amfilemon.dll=1,,
+amfilemonUI.dll=1,,
 
 [SourceDisksNames]
 1="Multi File Port Monitor Installation Disk",,,

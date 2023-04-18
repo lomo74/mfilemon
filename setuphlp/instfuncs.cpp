@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Lorenzo Monti
+Copyright (C) 2007-2023 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "stdafx.h"
 
-static const LPCWSTR pMonitorName = L"Multi File Port Monitor";
+static const LPCWSTR pMonitorName = L"Auto Multi File Port Monitor";
 
 BOOL __stdcall RegisterMonitor()
 {
@@ -27,7 +27,7 @@ BOOL __stdcall RegisterMonitor()
 
 	minfo.pName = _wcsdup(pMonitorName);
 	minfo.pEnvironment = NULL;
-	minfo.pDLLName = _wcsdup(L"mfilemon.dll");
+	minfo.pDLLName = _wcsdup(L"amfilemon.dll");
 
 	BOOL bRet = AddMonitorW(NULL, 2, (LPBYTE)&minfo);
 
@@ -72,9 +72,9 @@ BOOL __stdcall IsMonitorRegistered()
 
 	MONITOR_INFO_2W *pinfo = reinterpret_cast<MONITOR_INFO_2W*>(pPorts);
 
-	for (DWORD i = 0; i < pcReturned; i++)
+	for (; pcReturned-- > 0; pinfo++)
 	{
-		if (wcscmp(pMonitorName, pinfo[i].pName) == 0)
+		if (wcscmp(pMonitorName, pinfo->pName) == 0)
 		{
 			delete[] pPorts;
 			return TRUE;

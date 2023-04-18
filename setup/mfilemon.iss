@@ -1,5 +1,5 @@
 ; MFILEMON - print to file with automatic filename assignment
-; Copyright (C) 2007-2021 Lorenzo Monti
+; Copyright (C) 2007-2023 Lorenzo Monti
 ;
 ; This program is free software; you can redistribute it and/or
 ; modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@
 ; along with this program; if not, write to the Free Software
 ; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#define SrcApp "..\win32\release\mfilemon.dll"
+#define SrcApp "..\x64\release\amfilemon.dll"
 #define FileVerStr GetVersionNumbersString(SrcApp)
 #define StripBuild(str VerStr) Copy(VerStr, 1, RPos(".", VerStr) - 1)
 #define AppVerStr StripBuild(FileVerStr)
@@ -32,7 +32,7 @@ AppSupportURL=http://mfilemon.sourceforge.net/
 AppUpdatesURL=http://mfilemon.sourceforge.net/
 UninstallDisplayName={#AppName} {#AppVerStr}
 VersionInfoCompany=Lorenzo Monti
-VersionInfoCopyright=Copyright © 2007-2021 Lorenzo Monti
+VersionInfoCopyright=Copyright © 2007-2023 Lorenzo Monti
 VersionInfoDescription={#AppName} setup program
 VersionInfoProductName={#AppName}
 VersionInfoVersion={#FileVerStr}
@@ -46,7 +46,7 @@ DisableWelcomePage=no
 CloseApplications=no
 RestartApplications=no
 
-OutputBaseFilename=mfilemon-setup
+OutputBaseFilename=amfilemon-setup
 Compression=lzma
 SolidCompression=yes
 ArchitecturesAllowed=x86 x64
@@ -74,15 +74,15 @@ it.startingSpooler=Avvio dello spooler...
 
 [Files]
 ; x64 files
-Source: "..\x64\release\mfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x64
-Source: "..\x64\release\mfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x64
-Source: "..\x64\release-ita\mfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x64
-Source: "..\x64\release-ita\mfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x64
+Source: "..\x64\release\amfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x64
+Source: "..\x64\release\amfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x64
+Source: "..\x64\release-ita\amfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x64
+Source: "..\x64\release-ita\amfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x64
 ; x86 files
-Source: "..\win32\release\mfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x86
-Source: "..\win32\release\mfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x86
-Source: "..\win32\release-ita\mfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x86
-Source: "..\win32\release-ita\mfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x86
+Source: "..\win32\release\amfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x86
+Source: "..\win32\release\amfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x86
+Source: "..\win32\release-ita\amfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x86
+Source: "..\win32\release-ita\amfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x86
 ; files common to either architectures
 Source: "..\misc\docs\ghostscript-mfilemon-howto.html"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\misc\docs\images\*"; DestDir: "{app}\images"; Flags: ignoreversion
@@ -160,8 +160,8 @@ end;
 {----------------------------------------------------------------------------------------}
 function DestinationFilesExist: Boolean;
 begin
-  Result := FileExists(ExpandConstant('{sys}\mfilemon.dll')) and
-            FileExists(ExpandConstant('{sys}\mfilemonUI.dll'));
+  Result := FileExists(ExpandConstant('{sys}\amfilemon.dll')) and
+            FileExists(ExpandConstant('{sys}\amfilemonUI.dll'));
 end;
 
 {----------------------------------------------------------------------------------------}

@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Lorenzo Monti
+Copyright (C) 2007-2023 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -125,7 +125,7 @@ BEGIN
       VALUE "FileDescription", "Multi file port monitor UI\0"
       VALUE "FileVersion", szVersion
       VALUE "InternalName", "MFILEMONUI\0"
-      VALUE "LegalCopyright", "Copyright © 2007-2021 Lorenzo Monti\0"
+      VALUE "LegalCopyright", "Copyright © 2007-2023 Lorenzo Monti\0"
       VALUE "LegalTrademarks", "\0"
       VALUE "OriginalFilename", "MFILEMONUI.DLL\0"
       VALUE "PrivateBuild", "\0"
