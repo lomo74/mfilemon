@@ -13,7 +13,7 @@
 #define szLogLevel "Livello log"
 #define szCancel "Annulla"
 #define szCaption2 "nome nuova porta"
-#define szCopy1 "MFILEMON Copyright © 2007-2021 Lorenzo Monti."
+#define szCopy1 "MFILEMON Copyright © 2007-2023 Lorenzo Monti."
 #define szCopy2 "Rilasciato dietro licenza GNU General Public License."
 #define szCopy3 "Consultare LICENSE.txt per i dettagli."
 #define szRunAs "Esegui come utente (o utente@nome.dns.dominio)"

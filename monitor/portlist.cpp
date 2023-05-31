@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Lorenzo Monti
+Copyright (C) 2007-2023 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -584,7 +584,7 @@ void CPortList::SaveToRegistry()
 			int outlen1 = 0, outlen2 = 0;
 			int len = static_cast<int>((wcslen(pPortRec->m_pPort->Password()) + 1) * sizeof(WCHAR));
 
-			RAND_pseudo_bytes(iv, 16);
+			RAND_bytes(iv, 16);
 
 			EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 

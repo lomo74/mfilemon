@@ -1,6 +1,6 @@
 /*
 MFILEMON - print to file with automatic filename assignment
-Copyright (C) 2007-2021 Lorenzo Monti
+Copyright (C) 2007-2023 Lorenzo Monti
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -463,7 +463,7 @@ LPMONITOR2 WINAPI InitializePrintMonitor2(_In_ PMONITORINIT pMonitorInit, _Out_ 
 
 	if (IsWindowsXPOrGreater())
 	{
-		g_pLog->Always(L"MFILEMON is running on Windows XP or above");
+		g_pLog->Info(L"MFILEMON is running on Windows XP or above");
 		themon.cbSize = sizeof(MONITOR2);
 	}
 	else
@@ -512,7 +512,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
 // why the following call should not be done
 //		DisableThreadLibraryCalls(hinstDLL);
 		g_pLog = new CMfmLog();
-		g_pLog->Always(L"*** MFILEMON log start ***");
+		g_pLog->Info(L"*** MFILEMON log start ***");
 #ifdef _DEBUG
 		//Force max log level in debug mode
 		g_pLog->SetLogLevel(LOGLEVEL_DEBUG);
